@@ -34,10 +34,10 @@ def create_alert(alert: AlertCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(incident)
 
-    send_email_notification(incident)
-
+    # Run AI first
     ai_result = analyze_incident(incident)
 
+    # Save AI analysis
     analysis = AIAnalysis(
         incident_id=incident.id,
         root_cause=ai_result["root_cause"],
@@ -47,11 +47,14 @@ def create_alert(alert: AlertCreate, db: Session = Depends(get_db)):
 
     db.add(analysis)
     db.commit()
-    db.refresh(analysis)
+
+    # Send email WITH AI insights
+    email_sent = send_email_notification(incident, ai_result)
 
     return {
         "message": "Alert received and incident created",
         "incident_id": incident.id,
+        "email_sent": email_sent,
         "ai_analysis": ai_result
     }
 
@@ -60,17 +63,38 @@ def create_alert(alert: AlertCreate, db: Session = Depends(get_db)):
 def get_incidents(
     status: str | None = Query(default=None),
     vendor: str | None = Query(default=None),
+    severity: str | None = Query(default=None),
+    environment: str | None = Query(default=None),
+    error_code: str | None = Query(default=None),
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db)
 ):
     query = db.query(Incident)
 
-    if status is not None:
-        query = query.filter(Incident.status == status)
+    if status:
+        query = query.filter(Incident.status.ilike(status))
 
-    if vendor is not None:
-        query = query.filter(Incident.vendor == vendor)
+    if vendor:
+        query = query.filter(Incident.vendor.ilike(vendor))
 
-    incidents = query.all()
+    if severity:
+        query = query.filter(Incident.severity.ilike(severity))
+
+    if environment:
+        query = query.filter(Incident.environment.ilike(environment))
+
+    if error_code:
+        query = query.filter(Incident.error_code.ilike(error_code))
+
+    incidents = (
+        query
+        .order_by(Incident.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
     return incidents
 
 
@@ -128,6 +152,7 @@ def get_similar_incidents(incident_id: int, db: Session = Depends(get_db)):
         .filter(Incident.id != incident_id)
         .filter(Incident.vendor == current_incident.vendor)
         .filter(Incident.error_code == current_incident.error_code)
+        .order_by(Incident.created_at.desc())
         .all()
     )
 
