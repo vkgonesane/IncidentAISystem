@@ -1,3 +1,6 @@
+import os
+
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -13,13 +16,29 @@ from app.routes.intelligence import router as intelligence_router
 from app.routes.monitoring import router as monitoring_router
 from app.routes.realtime import router as realtime_router
 
+load_dotenv()
+
 app = FastAPI(title="Incident AI System API")
 
 Base.metadata.create_all(bind=engine)
 
+cors_origins = os.getenv("CORS_ORIGINS", "")
+
+allowed_origins = [
+    origin.strip()
+    for origin in cors_origins.split(",")
+    if origin.strip()
+]
+
+if not allowed_origins:
+    allowed_origins = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -40,4 +59,7 @@ def home():
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "service": "incident-ai-system-api",
+    }

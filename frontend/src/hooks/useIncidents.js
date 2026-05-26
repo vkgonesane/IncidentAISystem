@@ -11,7 +11,9 @@ const DEFAULT_FILTERS = {
   offset: 0,
 };
 
-const WS_URL = "ws://127.0.0.1:8000/ws/incidents";
+const WS_URL =
+  import.meta.env.VITE_WS_URL ||
+  "ws://127.0.0.1:8000/ws/incidents";
 
 function useIncidents() {
   const [incidents, setIncidents] = useState([]);
@@ -55,7 +57,9 @@ function useIncidents() {
         setIncidents(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Failed to fetch incidents:", err);
-        setError("Unable to load incidents. Please check if FastAPI is running.");
+        setError(
+          "Unable to load incidents. Please check if FastAPI is running."
+        );
       } finally {
         setLoading(false);
         setRefreshing(false);
