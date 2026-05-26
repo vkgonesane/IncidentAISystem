@@ -1,9 +1,9 @@
-import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
+import { Box, Card, CardContent, Skeleton, Stack, Typography } from "@mui/material";
 import ReportProblemOutlinedIcon from "@mui/icons-material/ReportProblemOutlined";
 import LocalFireDepartmentOutlinedIcon from "@mui/icons-material/LocalFireDepartmentOutlined";
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
-import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
-import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
+import PaymentsOutlinedIcon from "@mui/icons-material/PaymentsOutlined";
+import ScheduleOutlinedIcon from "@mui/icons-material/ScheduleOutlined";
 import SensorsOutlinedIcon from "@mui/icons-material/SensorsOutlined";
 
 const kpiIconStyles = {
@@ -16,9 +16,40 @@ const kpiIconStyles = {
   color: "#ffffff",
 };
 
-function KPICard({ title, value, subtitle, icon, gradient }) {
+function formatAmount(value) {
+  const numericValue = Number(value || 0);
+
+  if (numericValue >= 10000000) {
+    return `$${(numericValue / 10000000).toFixed(1)}Cr`;
+  }
+
+  if (numericValue >= 100000) {
+    return `$${(numericValue / 100000).toFixed(1)}L`;
+  }
+
+  return `$${numericValue.toLocaleString()}`;
+}
+
+function KPICard({ title, value, subtitle, icon, accentColor, loading }) {
   return (
-    <Card>
+    <Card
+      sx={{
+        position: "relative",
+        border: "0.5px solid #e2e8f0",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+      }}
+    >
+      <Box
+        sx={{
+          position: "absolute",
+          right: 0,
+          top: 0,
+          bottom: 0,
+          width: 4,
+          backgroundColor: accentColor,
+        }}
+      />
+
       <CardContent>
         <Stack direction="row" justifyContent="space-between" spacing={2}>
           <Box>
@@ -26,16 +57,20 @@ function KPICard({ title, value, subtitle, icon, gradient }) {
               {title}
             </Typography>
 
-            <Typography variant="h4" sx={{ mt: 1 }}>
-              {value}
-            </Typography>
+            {loading ? (
+              <Skeleton variant="text" width={90} height={44} sx={{ mt: 1 }} />
+            ) : (
+              <Typography variant="h4" sx={{ mt: 1, color: "#0f172a" }}>
+                {value}
+              </Typography>
+            )}
 
             <Typography variant="caption" color="text.secondary">
               {subtitle}
             </Typography>
           </Box>
 
-          <Box sx={{ ...kpiIconStyles, background: gradient }}>
+          <Box sx={{ ...kpiIconStyles, backgroundColor: accentColor }}>
             {icon}
           </Box>
         </Stack>
@@ -44,71 +79,75 @@ function KPICard({ title, value, subtitle, icon, gradient }) {
   );
 }
 
-function KPICards({ incidents = [] }) {
-  const totalIncidents = incidents.length;
+function KPICards({ incidents = [], summary = null, loading = false }) {
+  const fallbackTotal = incidents.length;
 
-  const activeIncidents = incidents.filter(
+  const fallbackOpen = incidents.filter(
     (incident) => String(incident.status || "").toUpperCase() !== "RESOLVED"
   ).length;
 
-  const criticalIncidents = incidents.filter(
+  const fallbackCritical = incidents.filter(
     (incident) => String(incident.severity || "").toUpperCase() === "CRITICAL"
   ).length;
 
-  const autoDetected = incidents.filter(
-    (incident) => String(incident.source_type || "").toUpperCase() === "AUTO"
+  const fallbackSlaBreached = incidents.filter(
+    (incident) => String(incident.sla_status || "").toUpperCase() === "BREACHED"
   ).length;
 
-  const duplicateAlertsPrevented = incidents.reduce((sum, incident) => {
-    return sum + Number(incident.duplicate_count || 0);
-  }, 0);
-
-  const resolvedIncidents = incidents.filter(
-    (incident) => String(incident.status || "").toUpperCase() === "RESOLVED"
+  const fallbackAnomalies = incidents.filter(
+    (incident) => Boolean(incident.is_anomaly)
   ).length;
+
+  const totalIncidents = summary?.total_incidents ?? fallbackTotal;
+  const openIncidents = summary?.open_incidents ?? fallbackOpen;
+  const criticalIncidents = summary?.critical_incidents ?? fallbackCritical;
+  const slaBreached = summary?.sla_breached ?? fallbackSlaBreached;
+  const anomaliesDetected = summary?.anomalies_detected ?? fallbackAnomalies;
+  const totalAmountImpacted = summary?.total_amount_impacted ?? 0;
+  const averageAckDelay = summary?.average_ack_delay ?? 0;
 
   const cards = [
     {
       title: "Total Incidents",
       value: totalIncidents,
-      subtitle: "All alerts in current view",
+      subtitle: "All ingested incidents",
       icon: <SensorsOutlinedIcon />,
-      gradient: "linear-gradient(135deg, #2563eb, #0284c7)",
+      accentColor: "#059669",
     },
     {
-      title: "Active Incidents",
-      value: activeIncidents,
-      subtitle: "Open or in progress",
+      title: "Open Incidents",
+      value: openIncidents,
+      subtitle: "Currently active issues",
       icon: <ReportProblemOutlinedIcon />,
-      gradient: "linear-gradient(135deg, #f59e0b, #ef4444)",
+      accentColor: "#dc2626",
     },
     {
       title: "Critical Incidents",
       value: criticalIncidents,
       subtitle: "Highest priority issues",
       icon: <LocalFireDepartmentOutlinedIcon />,
-      gradient: "linear-gradient(135deg, #dc2626, #991b1b)",
+      accentColor: "#991b1b",
     },
     {
-      title: "Auto Detected",
-      value: autoDetected,
-      subtitle: "Detected from log scanner",
+      title: "SLA Breached",
+      value: slaBreached,
+      subtitle: "ACK delay crossed SLA",
+      icon: <ScheduleOutlinedIcon />,
+      accentColor: "#d97706",
+    },
+    {
+      title: "Anomalies",
+      value: anomaliesDetected,
+      subtitle: "Unusual delay patterns",
       icon: <AutoAwesomeOutlinedIcon />,
-      gradient: "linear-gradient(135deg, #7c3aed, #2563eb)",
+      accentColor: "#0891b2",
     },
     {
-      title: "Duplicates Prevented",
-      value: duplicateAlertsPrevented,
-      subtitle: "Grouped duplicate alerts",
-      icon: <ContentCopyOutlinedIcon />,
-      gradient: "linear-gradient(135deg, #f59e0b, #d97706)",
-    },
-    {
-      title: "Resolved Incidents",
-      value: resolvedIncidents,
-      subtitle: "Closed incidents",
-      icon: <CheckCircleOutlineOutlinedIcon />,
-      gradient: "linear-gradient(135deg, #16a34a, #15803d)",
+      title: "Amount Impacted",
+      value: formatAmount(totalAmountImpacted),
+      subtitle: `Avg ACK delay: ${averageAckDelay} mins`,
+      icon: <PaymentsOutlinedIcon />,
+      accentColor: "#059669",
     },
   ];
 
@@ -126,7 +165,7 @@ function KPICards({ incidents = [] }) {
       }}
     >
       {cards.map((card) => (
-        <KPICard key={card.title} {...card} />
+        <KPICard key={card.title} {...card} loading={loading} />
       ))}
     </Box>
   );

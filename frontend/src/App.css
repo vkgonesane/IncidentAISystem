@@ -182,3 +182,4 @@
     border-right-color: var(--border);
   }
 }
+/* App-specific styles are handled through Material UI sx props and theme.js */

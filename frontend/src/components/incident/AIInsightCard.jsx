@@ -1,11 +1,22 @@
-import { Box, Card, CardContent, Divider, LinearProgress, Typography } from "@mui/material";
-import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
+import {
+  Box,
+  Card,
+  CardContent,
+  Divider,
+  LinearProgress,
+  Typography,
+} from "@mui/material";
+import PsychologyAltOutlinedIcon from "@mui/icons-material/PsychologyAltOutlined";
 import { getConfidenceLabel, safeText } from "../../utils/formatters";
 
 function InsightBlock({ title, value }) {
   return (
-    <Box sx={{ mb: 2 }}>
-      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 800 }}>
+    <Box>
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ fontWeight: 800 }}
+      >
         {title}
       </Typography>
 
@@ -19,42 +30,52 @@ function InsightBlock({ title, value }) {
 function AIInsightCard({ aiAnalysis }) {
   const confidence = aiAnalysis?.confidence;
   const numericConfidence = Number(confidence || 0);
-  const progressValue = numericConfidence <= 1 ? numericConfidence * 100 : numericConfidence;
+  const progressValue =
+    numericConfidence <= 1 ? numericConfidence * 100 : numericConfidence;
 
   return (
     <Card
       sx={{
-        background:
-          "linear-gradient(135deg, rgba(37,99,235,0.08), rgba(124,58,237,0.08))",
+        border: "1px solid #e2e8f0",
+        borderRadius: 3,
+        boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+        backgroundColor: "#ffffff",
       }}
     >
-      <CardContent>
+      <CardContent sx={{ p: 2 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.2, mb: 2 }}>
           <Box
             sx={{
-              width: 38,
-              height: 38,
-              borderRadius: 3,
-              background: "linear-gradient(135deg, #2563eb, #7c3aed)",
-              color: "#ffffff",
+              width: 36,
+              height: 36,
+              borderRadius: 2,
+              backgroundColor: "#f1f5f9",
+              color: "#334155",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <AutoAwesomeOutlinedIcon />
+            <PsychologyAltOutlinedIcon fontSize="small" />
           </Box>
 
           <Box>
-            <Typography variant="h6">AI Analysis</Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
+              AI Root Cause Analysis
+            </Typography>
+
             <Typography variant="body2" color="text.secondary">
-              Rule-based and history-aware incident recommendation
+              Incident-level RCA, recommendation, and priority reasoning
             </Typography>
           </Box>
         </Box>
 
         <Box sx={{ mb: 2 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 800 }}>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ fontWeight: 800 }}
+          >
             CONFIDENCE
           </Typography>
 
@@ -64,8 +85,12 @@ function AIInsightCard({ aiAnalysis }) {
               value={Number.isNaN(progressValue) ? 0 : Math.min(progressValue, 100)}
               sx={{
                 flex: 1,
-                height: 9,
+                height: 8,
                 borderRadius: 99,
+                backgroundColor: "#e2e8f0",
+                "& .MuiLinearProgress-bar": {
+                  backgroundColor: "#059669",
+                },
               }}
             />
 
@@ -77,11 +102,13 @@ function AIInsightCard({ aiAnalysis }) {
 
         <Divider sx={{ my: 2 }} />
 
-        <InsightBlock title="SUMMARY" value={aiAnalysis?.summary} />
-        <InsightBlock title="ROOT CAUSE" value={aiAnalysis?.root_cause} />
-        <InsightBlock title="RECOMMENDATION" value={aiAnalysis?.recommendation} />
-        <InsightBlock title="RECURRENCE INSIGHT" value={aiAnalysis?.recurrence_insight} />
-        <InsightBlock title="PRIORITY REASON" value={aiAnalysis?.priority_reason} />
+        <Box sx={{ display: "grid", gap: 2 }}>
+          <InsightBlock title="ROOT CAUSE" value={aiAnalysis?.root_cause} />
+          <InsightBlock title="RECOMMENDATION" value={aiAnalysis?.recommendation} />
+          <InsightBlock title="SUMMARY" value={aiAnalysis?.summary} />
+          <InsightBlock title="RECURRENCE INSIGHT" value={aiAnalysis?.recurrence_insight} />
+          <InsightBlock title="PRIORITY REASON" value={aiAnalysis?.priority_reason} />
+        </Box>
       </CardContent>
     </Card>
   );

@@ -4,7 +4,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database.db import Base, engine
 from app.models.incident import Incident
 from app.models.ai_analysis import AIAnalysis
+from app.models.incident_update import IncidentUpdate
+
 from app.routes.alerts import router as alerts_router
+from app.routes.dashboard import router as dashboard_router
+from app.routes.incidents import router as incidents_router
+from app.routes.intelligence import router as intelligence_router
+from app.routes.monitoring import router as monitoring_router
+from app.routes.realtime import router as realtime_router
 
 app = FastAPI(title="Incident AI System API")
 
@@ -19,6 +26,11 @@ app.add_middleware(
 )
 
 app.include_router(alerts_router)
+app.include_router(dashboard_router)
+app.include_router(incidents_router)
+app.include_router(intelligence_router)
+app.include_router(monitoring_router)
+app.include_router(realtime_router)
 
 
 @app.get("/")

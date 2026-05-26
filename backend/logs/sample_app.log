@@ -1,0 +1,7 @@
+INFO Application started
+INFO Database connected
+ERROR Experian PROD HTTP_502 upstream gateway failure
+INFO Retry initiated
+ERROR PaymentsAPI PROD TIMEOUT request exceeded 30s
+ERROR Experian PROD HTTP_502 upstream gateway failure repeated
+ERROR Experian PROD HTTP_502 recurring gateway instability

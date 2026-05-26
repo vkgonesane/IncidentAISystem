@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getIncidents, updateIncident } from "../api/incidentApi";
 
 const DEFAULT_FILTERS = {
@@ -11,12 +11,20 @@ const DEFAULT_FILTERS = {
   offset: 0,
 };
 
+const WS_URL = "ws://127.0.0.1:8000/ws/incidents";
+
 function useIncidents() {
   const [incidents, setIncidents] = useState([]);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+  const [liveEvent, setLiveEvent] = useState(null);
+  const [liveStatus, setLiveStatus] = useState("connecting");
+
+  const socketRef = useRef(null);
+  const reconnectTimerRef = useRef(null);
+  const mountedRef = useRef(false);
 
   const buildApiFilters = useCallback((currentFilters) => {
     const apiFilters = {};
@@ -88,12 +96,86 @@ function useIncidents() {
     return () => clearInterval(intervalId);
   }, [fetchIncidents]);
 
+  useEffect(() => {
+    mountedRef.current = true;
+
+    const connectSocket = () => {
+      if (!mountedRef.current) return;
+
+      setLiveStatus("connecting");
+
+      const socket = new WebSocket(WS_URL);
+      socketRef.current = socket;
+
+      socket.onopen = () => {
+        if (!mountedRef.current) return;
+
+        console.log("Incident WebSocket connected");
+        setLiveStatus("connected");
+      };
+
+      socket.onmessage = async (event) => {
+        if (!mountedRef.current) return;
+
+        try {
+          const message = JSON.parse(event.data);
+
+          setLiveEvent(message);
+
+          if (
+            message.type === "INCIDENT_CREATED" ||
+            message.type === "DUPLICATE_ALERT"
+          ) {
+            await fetchIncidents({ silent: true });
+          }
+        } catch (err) {
+          console.error("Failed to process websocket message:", err);
+        }
+      };
+
+      socket.onerror = () => {
+        if (!mountedRef.current) return;
+
+        setLiveStatus("error");
+      };
+
+      socket.onclose = () => {
+        if (!mountedRef.current) return;
+
+        setLiveStatus("reconnecting");
+
+        reconnectTimerRef.current = setTimeout(() => {
+          connectSocket();
+        }, 3000);
+      };
+    };
+
+    connectSocket();
+
+    return () => {
+      mountedRef.current = false;
+
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current);
+      }
+
+      if (
+        socketRef.current &&
+        socketRef.current.readyState !== WebSocket.CLOSED
+      ) {
+        socketRef.current.close();
+      }
+    };
+  }, [fetchIncidents]);
+
   return {
     incidents,
     filters,
     loading,
     refreshing,
     error,
+    liveEvent,
+    liveStatus,
     updateFilter,
     resetFilters,
     fetchIncidents,

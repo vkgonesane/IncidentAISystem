@@ -1,56 +1,213 @@
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
-import AddAlertOutlinedIcon from "@mui/icons-material/AddAlertOutlined";
-import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 
-function DashboardHeader() {
+import AddAlertOutlinedIcon from "@mui/icons-material/AddAlertOutlined";
+import HubOutlinedIcon from "@mui/icons-material/HubOutlined";
+import SensorsOutlinedIcon from "@mui/icons-material/SensorsOutlined";
+import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
+
+function getLiveMeta(liveStatus) {
+  const status = String(liveStatus || "").toLowerCase();
+
+  if (status === "connected") {
+    return {
+      label: "Live connected",
+      bg: "#ecfdf5",
+      color: "#065f46",
+      border: "#a7f3d0",
+    };
+  }
+
+  if (status === "connecting" || status === "reconnecting") {
+    return {
+      label: "Live reconnecting",
+      bg: "#fffbeb",
+      color: "#92400e",
+      border: "#fde68a",
+    };
+  }
+
+  if (status === "error") {
+    return {
+      label: "Live error",
+      bg: "#fee2e2",
+      color: "#991b1b",
+      border: "#fecaca",
+    };
+  }
+
+  return {
+    label: "Live disconnected",
+    bg: "#f1f5f9",
+    color: "#475569",
+    border: "#cbd5e1",
+  };
+}
+
+function DashboardHeader({
+  onSimulateAlert,
+  simulatingAlert = false,
+  liveStatus = "disconnected",
+  liveEvent = null,
+}) {
+  const liveMeta = getLiveMeta(liveStatus);
+
   return (
     <Box
       sx={{
         mb: 3,
         p: 3,
-        borderRadius: 5,
-        background:
-          "linear-gradient(135deg, rgba(37,99,235,0.12), rgba(124,58,237,0.10))",
-        border: "1px solid rgba(148, 163, 184, 0.25)",
+        borderRadius: 4,
+        backgroundColor: "#ffffff",
+        border: "1px solid #e2e8f0",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
       }}
     >
       <Stack
-        direction={{ xs: "column", md: "row" }}
-        justifyContent="space-between"
-        spacing={2}
+        spacing={2.5}
+        sx={{
+          flexDirection: {
+            xs: "column",
+            md: "row",
+          },
+          justifyContent: "space-between",
+          alignItems: {
+            xs: "flex-start",
+            md: "center",
+          },
+        }}
       >
         <Box>
-          <Chip
-            icon={<AutoAwesomeOutlinedIcon />}
-            label="AI-assisted incident operations"
-            color="secondary"
-            variant="outlined"
-            sx={{ mb: 1.5 }}
-          />
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              flexWrap: "wrap",
+              gap: 1,
+              mb: 1.5,
+            }}
+          >
+            <Chip
+              icon={<HubOutlinedIcon />}
+              label="AIOps intelligence layer"
+              size="small"
+              sx={{
+                backgroundColor: "#ecfdf5",
+                color: "#065f46",
+                fontWeight: 800,
+                border: "1px solid #a7f3d0",
+              }}
+            />
 
-          <Typography variant="h4">
+            <Chip
+              icon={<SensorsOutlinedIcon />}
+              label="Monitoring webhook enabled"
+              size="small"
+              sx={{
+                backgroundColor: "#f1f5f9",
+                color: "#334155",
+                fontWeight: 800,
+                border: "1px solid #cbd5e1",
+              }}
+            />
+
+            <Chip
+              icon={
+                <FiberManualRecordIcon
+                  sx={{
+                    fontSize: 12,
+                    color: liveMeta.color,
+                  }}
+                />
+              }
+              label={liveMeta.label}
+              size="small"
+              sx={{
+                backgroundColor: liveMeta.bg,
+                color: liveMeta.color,
+                fontWeight: 900,
+                border: `1px solid ${liveMeta.border}`,
+              }}
+            />
+          </Stack>
+
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 950,
+              color: "#0f172a",
+              letterSpacing: "-0.04em",
+            }}
+          >
             Incident AI Command Center
           </Typography>
 
           <Typography
             variant="body1"
             color="text.secondary"
-            sx={{ mt: 1, maxWidth: 760 }}
+            sx={{
+              mt: 1,
+              maxWidth: 760,
+              lineHeight: 1.7,
+            }}
           >
-            Monitor alerts, detect duplicates, review AI-generated root cause analysis,
-            and resolve incidents from one professional AIOps dashboard.
+            Ingest monitoring alerts, detect vendor/payment SLA risk,
+            correlate incidents, and review AI-generated operational
+            recommendations from one AIOps investigation workspace.
           </Typography>
+
+          {liveEvent && (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{
+                display: "block",
+                mt: 1,
+                fontWeight: 700,
+              }}
+            >
+              Last realtime event: {liveEvent.type}
+              {liveEvent.incident_id
+                ? ` · Incident #${liveEvent.incident_id}`
+                : ""}
+            </Typography>
+          )}
         </Box>
 
-        <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Stack direction="row" spacing={1.2}>
+          <Button
+            variant="outlined"
+            size="large"
+            startIcon={<SensorsOutlinedIcon />}
+            onClick={onSimulateAlert}
+            disabled={simulatingAlert}
+            sx={{
+              borderRadius: 2,
+              fontWeight: 800,
+              borderColor: "#cbd5e1",
+              color: "#334155",
+              backgroundColor: "#ffffff",
+            }}
+          >
+            {simulatingAlert ? "Simulating..." : "Simulate Alert"}
+          </Button>
+
           <Button
             variant="contained"
             size="large"
             startIcon={<AddAlertOutlinedIcon />}
+            sx={{
+              borderRadius: 2,
+              fontWeight: 900,
+              backgroundColor: "#059669",
+              boxShadow: "0 8px 18px rgba(5, 150, 105, 0.22)",
+              "&:hover": {
+                backgroundColor: "#047857",
+              },
+            }}
           >
             New Manual Alert
           </Button>
-        </Box>
+        </Stack>
       </Stack>
     </Box>
   );

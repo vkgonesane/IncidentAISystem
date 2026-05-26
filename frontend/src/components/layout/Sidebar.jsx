@@ -107,11 +107,17 @@ function Sidebar() {
             </ListItemIcon>
 
             <ListItemText
-              primary={item.label}
-              primaryTypographyProps={{
-                fontSize: 14,
-                fontWeight: item.active ? 800 : 600,
-              }}
+              primary={
+                <Typography
+                  component="span"
+                  sx={{
+                    fontSize: 14,
+                    fontWeight: item.active ? 800 : 600,
+                  }}
+                >
+                  {item.label}
+                </Typography>
+              }
             />
           </ListItemButton>
         ))}

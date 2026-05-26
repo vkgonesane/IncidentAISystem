@@ -1,4 +1,12 @@
-import { Avatar, Box, Chip, IconButton, Stack, Typography } from "@mui/material";
+import {
+  Avatar,
+  Box,
+  Chip,
+  IconButton,
+  Stack,
+  Typography,
+} from "@mui/material";
+
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import BoltOutlinedIcon from "@mui/icons-material/BoltOutlined";
@@ -21,16 +29,32 @@ function Topbar({ refreshing, onRefresh }) {
       }}
     >
       <Box>
-        <Typography variant="h6">Operations Dashboard</Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="h6">
+          Operations Dashboard
+        </Typography>
+
+        <Typography
+          variant="body2"
+          color="text.secondary"
+        >
           Real-time incident intelligence and AI-assisted triage
         </Typography>
       </Box>
 
-      <Stack direction="row" spacing={1.5} alignItems="center">
+      <Stack
+        direction="row"
+        spacing={1.5}
+        sx={{
+          alignItems: "center",
+        }}
+      >
         <Chip
           icon={<BoltOutlinedIcon />}
-          label={refreshing ? "Syncing..." : "Auto refresh: 15s"}
+          label={
+            refreshing
+              ? "Syncing..."
+              : "Auto refresh: 15s"
+          }
           color={refreshing ? "warning" : "success"}
           variant="outlined"
           size="small"
