@@ -7,7 +7,6 @@ import {
   Typography,
 } from "@mui/material";
 
-import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import BoltOutlinedIcon from "@mui/icons-material/BoltOutlined";
 
@@ -30,14 +29,11 @@ function Topbar({ refreshing, onRefresh }) {
     >
       <Box>
         <Typography variant="h6">
-          Operations Dashboard
+          VendorIQ Dashboard
         </Typography>
 
-        <Typography
-          variant="body2"
-          color="text.secondary"
-        >
-          Real-time incident intelligence and AI-assisted triage
+        <Typography variant="body2" color="text.secondary">
+          Real-time vendor incident intelligence and AI-assisted triage
         </Typography>
       </Box>
 
@@ -50,11 +46,7 @@ function Topbar({ refreshing, onRefresh }) {
       >
         <Chip
           icon={<BoltOutlinedIcon />}
-          label={
-            refreshing
-              ? "Syncing..."
-              : "Auto refresh: 15s"
-          }
+          label={refreshing ? "Syncing..." : "Auto refresh: 15s"}
           color={refreshing ? "warning" : "success"}
           variant="outlined"
           size="small"
@@ -64,20 +56,25 @@ function Topbar({ refreshing, onRefresh }) {
           <RefreshOutlinedIcon />
         </IconButton>
 
-        <IconButton>
-          <NotificationsNoneOutlinedIcon />
-        </IconButton>
-
-        <Avatar
+        <Chip
+          avatar={
+            <Avatar
+              sx={{
+                bgcolor: "primary.main",
+                color: "#ffffff",
+                fontWeight: 900,
+              }}
+            >
+              V
+            </Avatar>
+          }
+          label="Vaibhav"
           sx={{
-            width: 38,
-            height: 38,
-            bgcolor: "primary.main",
             fontWeight: 800,
+            backgroundColor: "#f8fafc",
+            border: "1px solid #e2e8f0",
           }}
-        >
-          RV
-        </Avatar>
+        />
       </Stack>
     </Box>
   );

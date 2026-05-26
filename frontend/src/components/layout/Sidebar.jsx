@@ -7,35 +7,8 @@ import {
   ListItemText,
   Typography,
 } from "@mui/material";
-import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
-import SmartToyOutlinedIcon from "@mui/icons-material/SmartToyOutlined";
-import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 
-const menuItems = [
-  {
-    label: "Incident Command",
-    icon: <DashboardOutlinedIcon />,
-    active: true,
-  },
-  {
-    label: "AI Insights",
-    icon: <SmartToyOutlinedIcon />,
-  },
-  {
-    label: "Timeline",
-    icon: <TimelineOutlinedIcon />,
-  },
-  {
-    label: "Reliability",
-    icon: <ShieldOutlinedIcon />,
-  },
-  {
-    label: "Settings",
-    icon: <SettingsOutlinedIcon />,
-  },
-];
+import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 
 function Sidebar() {
   return (
@@ -64,63 +37,62 @@ function Sidebar() {
             justifyContent: "center",
             mb: 1.5,
             fontWeight: 900,
-            fontSize: 20,
+            fontSize: 18,
           }}
         >
-          IA
+          VQ
         </Box>
 
         <Typography variant="h6" sx={{ color: "#ffffff", lineHeight: 1.2 }}>
-          Incident AI
+          VendorIQ
         </Typography>
 
         <Typography variant="body2" sx={{ color: "#94a3b8", mt: 0.5 }}>
-          AIOps Command Center
+          Vendor Incident Intelligence
+        </Typography>
+
+        <Typography variant="caption" sx={{ color: "#cbd5e1", mt: 1.2, display: "block" }}>
+          Built by Vaibhav
         </Typography>
       </Box>
 
       <Divider sx={{ borderColor: "rgba(148, 163, 184, 0.18)" }} />
 
       <List sx={{ px: 1.5, py: 2 }}>
-        {menuItems.map((item) => (
-          <ListItemButton
-            key={item.label}
+        <ListItemButton
+          sx={{
+            borderRadius: 3,
+            mb: 0.75,
+            color: "#ffffff",
+            backgroundColor: "rgba(37, 99, 235, 0.22)",
+            "&:hover": {
+              backgroundColor: "rgba(37, 99, 235, 0.28)",
+            },
+          }}
+        >
+          <ListItemIcon
             sx={{
-              borderRadius: 3,
-              mb: 0.75,
-              color: item.active ? "#ffffff" : "#cbd5e1",
-              backgroundColor: item.active
-                ? "rgba(37, 99, 235, 0.22)"
-                : "transparent",
-              "&:hover": {
-                backgroundColor: "rgba(148, 163, 184, 0.12)",
-              },
+              minWidth: 40,
+              color: "#60a5fa",
             }}
           >
-            <ListItemIcon
-              sx={{
-                minWidth: 40,
-                color: item.active ? "#60a5fa" : "#94a3b8",
-              }}
-            >
-              {item.icon}
-            </ListItemIcon>
+            <DashboardOutlinedIcon />
+          </ListItemIcon>
 
-            <ListItemText
-              primary={
-                <Typography
-                  component="span"
-                  sx={{
-                    fontSize: 14,
-                    fontWeight: item.active ? 800 : 600,
-                  }}
-                >
-                  {item.label}
-                </Typography>
-              }
-            />
-          </ListItemButton>
-        ))}
+          <ListItemText
+            primary={
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: 14,
+                  fontWeight: 800,
+                }}
+              >
+                Incident Command
+              </Typography>
+            }
+          />
+        </ListItemButton>
       </List>
 
       <Box sx={{ mt: "auto", p: 2 }}>
@@ -137,7 +109,7 @@ function Sidebar() {
           </Typography>
 
           <Typography variant="caption" sx={{ color: "#94a3b8" }}>
-            FastAPI + React + Rule-based AI
+            FastAPI + React + AIOps Intelligence
           </Typography>
         </Box>
       </Box>

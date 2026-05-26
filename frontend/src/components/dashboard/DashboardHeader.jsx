@@ -1,6 +1,5 @@
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 
-import AddAlertOutlinedIcon from "@mui/icons-material/AddAlertOutlined";
 import HubOutlinedIcon from "@mui/icons-material/HubOutlined";
 import SensorsOutlinedIcon from "@mui/icons-material/SensorsOutlined";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
@@ -88,7 +87,7 @@ function DashboardHeader({
           >
             <Chip
               icon={<HubOutlinedIcon />}
-              label="AIOps intelligence layer"
+              label="Vendor intelligence layer"
               size="small"
               sx={{
                 backgroundColor: "#ecfdf5",
@@ -100,7 +99,7 @@ function DashboardHeader({
 
             <Chip
               icon={<SensorsOutlinedIcon />}
-              label="Monitoring webhook enabled"
+              label="Monitoring-ready workflow"
               size="small"
               sx={{
                 backgroundColor: "#f1f5f9",
@@ -138,7 +137,7 @@ function DashboardHeader({
               letterSpacing: "-0.04em",
             }}
           >
-            Incident AI Command Center
+            VendorIQ Command Center
           </Typography>
 
           <Typography
@@ -150,9 +149,9 @@ function DashboardHeader({
               lineHeight: 1.7,
             }}
           >
-            Ingest monitoring alerts, detect vendor/payment SLA risk,
-            correlate incidents, and review AI-generated operational
-            recommendations from one AIOps investigation workspace.
+            Monitor vendor/payment incidents, detect SLA risk, correlate related
+            failures, and review AI-generated operational recommendations from
+            one investigation workspace.
           </Typography>
 
           {liveEvent && (
@@ -175,26 +174,11 @@ function DashboardHeader({
 
         <Stack direction="row" spacing={1.2}>
           <Button
-            variant="outlined"
+            variant="contained"
             size="large"
             startIcon={<SensorsOutlinedIcon />}
             onClick={onSimulateAlert}
             disabled={simulatingAlert}
-            sx={{
-              borderRadius: 2,
-              fontWeight: 800,
-              borderColor: "#cbd5e1",
-              color: "#334155",
-              backgroundColor: "#ffffff",
-            }}
-          >
-            {simulatingAlert ? "Simulating..." : "Simulate Alert"}
-          </Button>
-
-          <Button
-            variant="contained"
-            size="large"
-            startIcon={<AddAlertOutlinedIcon />}
             sx={{
               borderRadius: 2,
               fontWeight: 900,
@@ -205,7 +189,7 @@ function DashboardHeader({
               },
             }}
           >
-            New Manual Alert
+            {simulatingAlert ? "Simulating..." : "Simulate Vendor Alert"}
           </Button>
         </Stack>
       </Stack>
