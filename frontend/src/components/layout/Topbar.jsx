@@ -5,6 +5,7 @@ import {
   IconButton,
   Stack,
   Typography,
+  Tooltip,
 } from "@mui/material";
 
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
@@ -52,9 +53,11 @@ function Topbar({ refreshing, onRefresh }) {
           size="small"
         />
 
-        <IconButton onClick={onRefresh}>
-          <RefreshOutlinedIcon />
-        </IconButton>
+        <Tooltip title="Refresh dashboard data">
+          <IconButton onClick={onRefresh}>
+            <RefreshOutlinedIcon />
+          </IconButton>
+        </Tooltip>
 
         <Chip
           avatar={
