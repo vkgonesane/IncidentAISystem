@@ -34,21 +34,11 @@ import DuplicateBadge from "./DuplicateBadge";
 function DetailItem({ label, value }) {
   return (
     <Box>
-      <Typography
-        variant="caption"
-        color="text.secondary"
-        sx={{ fontWeight: 800 }}
-      >
+      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 800 }}>
         {label}
       </Typography>
 
-      <Typography
-        variant="body2"
-        sx={{
-          mt: 0.35,
-          fontWeight: 700,
-        }}
-      >
+      <Typography variant="body2" sx={{ mt: 0.35, fontWeight: 700 }}>
         {safeText(value)}
       </Typography>
     </Box>
@@ -65,13 +55,7 @@ function DetailCard({ title, children }) {
       }}
     >
       <CardContent sx={{ p: 2 }}>
-        <Typography
-          variant="subtitle2"
-          sx={{
-            fontWeight: 900,
-            mb: 1.5,
-          }}
-        >
+        <Typography variant="subtitle2" sx={{ fontWeight: 900, mb: 1.5 }}>
           {title}
         </Typography>
 
@@ -93,11 +77,7 @@ function HeaderMetric({ label, value }) {
         minWidth: 112,
       }}
     >
-      <Typography
-        variant="caption"
-        color="text.secondary"
-        sx={{ fontWeight: 800 }}
-      >
+      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 800 }}>
         {label}
       </Typography>
 
@@ -106,6 +86,41 @@ function HeaderMetric({ label, value }) {
       </Typography>
     </Box>
   );
+}
+
+function getRiskBannerMeta(severity) {
+  const normalizedSeverity = String(severity || "").toUpperCase();
+
+  if (normalizedSeverity === "CRITICAL") {
+    return {
+      title: "HIGH RISK INCIDENT",
+      background: "linear-gradient(135deg, #fee2e2, #fef2f2)",
+      border: "1px solid #fecaca",
+      color: "#b91c1c",
+      message:
+        "This incident is marked critical and should be reviewed immediately because it may impact vendor processing, reconciliation timelines, or downstream payment workflows.",
+    };
+  }
+
+  if (normalizedSeverity === "HIGH") {
+    return {
+      title: "ELEVATED OPERATIONAL RISK",
+      background: "linear-gradient(135deg, #ffedd5, #fff7ed)",
+      border: "1px solid #fed7aa",
+      color: "#9a3412",
+      message:
+        "This incident has elevated operational risk and should be monitored closely for SLA impact, duplicate activity, or vendor processing delays.",
+    };
+  }
+
+  return {
+    title: "OPERATIONAL SIGNAL DETECTED",
+    background: "linear-gradient(135deg, #ecfdf5, #f0fdf4)",
+    border: "1px solid #bbf7d0",
+    color: "#065f46",
+    message:
+      "VendorIQ detected an operational signal and generated investigation context for SLA, vendor, and payment-processing review.",
+  };
 }
 
 function IncidentDrawer({ open, incident, onClose, onResolve }) {
@@ -127,9 +142,7 @@ function IncidentDrawer({ open, incident, onClose, onResolve }) {
 
       try {
         setTimelineLoading(true);
-
         const data = await getIncidentTimeline(incident.id);
-
         setTimeline(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Failed to load timeline:", err);
@@ -155,10 +168,8 @@ function IncidentDrawer({ open, incident, onClose, onResolve }) {
         setMajorSummary(summaryData);
       } catch (err) {
         console.error("Failed to load AIOps intelligence:", err);
-
         setCorrelation(null);
         setMajorSummary(null);
-
         setAiopsError("Unable to load AIOps intelligence.");
       } finally {
         setAiopsLoading(false);
@@ -177,11 +188,9 @@ function IncidentDrawer({ open, incident, onClose, onResolve }) {
       setResolveError("");
 
       await onResolve(incident.id);
-
       onClose();
     } catch (err) {
       console.error(err);
-
       setResolveError("Unable to resolve incident.");
     } finally {
       setResolving(false);
@@ -189,6 +198,7 @@ function IncidentDrawer({ open, incident, onClose, onResolve }) {
   };
 
   const rawPayload = incident?.raw_payload;
+  const riskBannerMeta = getRiskBannerMeta(incident?.severity);
 
   return (
     <Drawer
@@ -214,13 +224,7 @@ function IncidentDrawer({ open, incident, onClose, onResolve }) {
         },
       }}
     >
-      <Box
-        sx={{
-          height: "100%",
-          overflowY: "auto",
-          p: 2.5,
-        }}
-      >
+      <Box sx={{ height: "100%", overflowY: "auto", p: 2.5 }}>
         <Card
           sx={{
             borderRadius: 4,
@@ -231,12 +235,7 @@ function IncidentDrawer({ open, incident, onClose, onResolve }) {
           }}
         >
           <CardContent sx={{ p: 2.2 }}>
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-              alignItems="flex-start"
-              spacing={2}
-            >
+            <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2}>
               <Box>
                 <Stack direction="row" spacing={1} alignItems="center">
                   <Box
@@ -256,21 +255,11 @@ function IncidentDrawer({ open, incident, onClose, onResolve }) {
                   </Box>
 
                   <Box>
-                    <Typography
-                      variant="h5"
-                      sx={{
-                        fontWeight: 950,
-                        lineHeight: 1.1,
-                      }}
-                    >
+                    <Typography variant="h5" sx={{ fontWeight: 950, lineHeight: 1.1 }}>
                       Incident #{incident?.id}
                     </Typography>
 
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ mt: 0.25 }}
-                    >
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
                       {safeText(
                         `${incident?.error_code || "Unknown error"} • ${
                           incident?.vendor || "Unknown vendor"
@@ -295,7 +284,6 @@ function IncidentDrawer({ open, incident, onClose, onResolve }) {
                   justifyContent: "center",
                   cursor: "pointer",
                   transition: "all 0.18s ease",
-
                   "&:hover": {
                     backgroundColor: "#f8fafc",
                     borderColor: "#cbd5e1",
@@ -303,29 +291,42 @@ function IncidentDrawer({ open, incident, onClose, onResolve }) {
                   },
                 }}
               >
-                <CloseIcon
-                  sx={{
-                    fontSize: 18,
-                    color: "#475569",
-                  }}
-                />
+                <CloseIcon sx={{ fontSize: 18, color: "#475569" }} />
               </Box>
             </Stack>
 
-            <Stack
-              direction="row"
-              spacing={1}
-              flexWrap="wrap"
-              sx={{
-                gap: 1,
-                mt: 2,
-              }}
-            >
+            <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1, mt: 2 }}>
               <SeverityChip severity={incident?.severity} />
               <StatusChip status={incident?.status} />
               <SourceBadge sourceType={incident?.source_type} />
               <DuplicateBadge duplicateCount={incident?.duplicate_count} />
             </Stack>
+
+            <Box
+              sx={{
+                mt: 2,
+                p: 2,
+                borderRadius: 3,
+                background: riskBannerMeta.background,
+                border: riskBannerMeta.border,
+              }}
+            >
+              <Typography variant="subtitle2" sx={{ fontWeight: 900, color: riskBannerMeta.color }}>
+                {riskBannerMeta.title}
+              </Typography>
+
+              <Typography
+                variant="body2"
+                sx={{
+                  mt: 0.8,
+                  lineHeight: 1.7,
+                  fontWeight: 600,
+                  color: "#334155",
+                }}
+              >
+                {riskBannerMeta.message}
+              </Typography>
+            </Box>
 
             <Box
               sx={{
@@ -336,10 +337,7 @@ function IncidentDrawer({ open, incident, onClose, onResolve }) {
               }}
             >
               <HeaderMetric label="SLA Status" value={incident?.sla_status} />
-              <HeaderMetric
-                label="ACK Delay"
-                value={`${incident?.ack_delay_minutes || 0} mins`}
-              />
+              <HeaderMetric label="ACK Delay" value={`${incident?.ack_delay_minutes || 0} mins`} />
               <HeaderMetric label="Source" value={incident?.source_name} />
             </Box>
 
@@ -375,64 +373,22 @@ function IncidentDrawer({ open, incident, onClose, onResolve }) {
 
         <Stack spacing={2}>
           <DetailCard title="Operational Context">
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 1.8,
-              }}
-            >
+            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.8 }}>
               <DetailItem label="Vendor" value={incident?.vendor} />
-              <DetailItem
-                label="Environment"
-                value={incident?.environment}
-              />
-              <DetailItem
-                label="Error Code"
-                value={incident?.error_code}
-              />
-              <DetailItem
-                label="Source"
-                value={incident?.source_name}
-              />
-              <DetailItem
-                label="SLA Status"
-                value={incident?.sla_status}
-              />
-              <DetailItem
-                label="ACK Delay"
-                value={`${incident?.ack_delay_minutes || 0} mins`}
-              />
+              <DetailItem label="Environment" value={incident?.environment} />
+              <DetailItem label="Error Code" value={incident?.error_code} />
+              <DetailItem label="Source" value={incident?.source_name} />
+              <DetailItem label="SLA Status" value={incident?.sla_status} />
+              <DetailItem label="ACK Delay" value={`${incident?.ack_delay_minutes || 0} mins`} />
             </Box>
           </DetailCard>
 
           <DetailCard title="Business Impact">
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 1.8,
-              }}
-            >
-              <DetailItem
-                label="Records Impacted"
-                value={incident?.records_impacted}
-              />
-
-              <DetailItem
-                label="Amount Impacted"
-                value={incident?.amount_impacted}
-              />
-
-              <DetailItem
-                label="Created At"
-                value={formatDateTime(incident?.created_at)}
-              />
-
-              <DetailItem
-                label="Last Seen"
-                value={formatDateTime(incident?.last_seen_at)}
-              />
+            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.8 }}>
+              <DetailItem label="Records Impacted" value={incident?.records_impacted} />
+              <DetailItem label="Amount Impacted" value={incident?.amount_impacted} />
+              <DetailItem label="Created At" value={formatDateTime(incident?.created_at)} />
+              <DetailItem label="Last Seen" value={formatDateTime(incident?.last_seen_at)} />
             </Box>
           </DetailCard>
 
@@ -445,6 +401,34 @@ function IncidentDrawer({ open, incident, onClose, onResolve }) {
 
           <AIInsightCard aiAnalysis={incident?.ai_analysis} />
 
+          <Card
+            sx={{
+              borderRadius: 3,
+              border: "1px solid #e2e8f0",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+            }}
+          >
+            <CardContent>
+              <Typography variant="subtitle2" sx={{ fontWeight: 900, mb: 1.5 }}>
+                Recommended Operational Actions
+              </Typography>
+
+              <Stack spacing={1.2}>
+                <Alert severity="warning">
+                  Escalate vendor support if ACK delay exceeds SLA threshold.
+                </Alert>
+
+                <Alert severity="info">
+                  Validate payment queue and reconciliation pipeline status.
+                </Alert>
+
+                <Alert severity="success">
+                  Continue monitoring vendor response and incident duplication trends.
+                </Alert>
+              </Stack>
+            </CardContent>
+          </Card>
+
           {rawPayload && (
             <Box
               sx={{
@@ -456,13 +440,7 @@ function IncidentDrawer({ open, incident, onClose, onResolve }) {
                 maxHeight: 180,
               }}
             >
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  mb: 1,
-                  color: "#ffffff",
-                }}
-              >
+              <Typography variant="subtitle2" sx={{ mb: 1, color: "#ffffff" }}>
                 Raw Payload
               </Typography>
 
@@ -474,17 +452,12 @@ function IncidentDrawer({ open, incident, onClose, onResolve }) {
                   wordBreak: "break-word",
                 }}
               >
-                {typeof rawPayload === "string"
-                  ? rawPayload
-                  : JSON.stringify(rawPayload, null, 2)}
+                {typeof rawPayload === "string" ? rawPayload : JSON.stringify(rawPayload, null, 2)}
               </pre>
             </Box>
           )}
 
-          <TimelinePanel
-            timeline={timeline}
-            loading={timelineLoading}
-          />
+          <TimelinePanel timeline={timeline} loading={timelineLoading} />
         </Stack>
       </Box>
     </Drawer>

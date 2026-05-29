@@ -27,6 +27,7 @@ import AlertSourcesCard from "../components/dashboard/AlertSourcesCard";
 import LatestAIInsightCard from "../components/dashboard/LatestAIInsightCard";
 
 import useIncidents from "../hooks/useIncidents";
+import { useAuth } from "../auth/AuthContext";
 
 import {
   createManualAlert,
@@ -71,6 +72,12 @@ function SectionCard({ title, subtitle, children }) {
 }
 
 function Dashboard() {
+  const { user } = useAuth();
+
+  const isAdmin = user?.role === "ADMIN";
+  const isOperator = user?.role === "OPERATOR";
+  const canManageIncidents = isAdmin || isOperator;
+
   const {
     incidents,
     filters,
@@ -113,7 +120,6 @@ function Dashboard() {
   const fetchDashboardSummary = async ({ silent = false } = {}) => {
     try {
       if (!silent) setSummaryLoading(true);
-
       setSummaryError("");
 
       const data = await getDashboardSummary();
@@ -164,7 +170,9 @@ function Dashboard() {
       message:
         liveEvent.type === "DUPLICATE_ALERT"
           ? `Duplicate activity detected for incident #${liveEvent.incident_id}`
-          : `${liveEvent.error_code || "Alert"} from ${liveEvent.vendor || "unknown vendor"}`,
+          : `${liveEvent.error_code || "Alert"} from ${
+              liveEvent.vendor || "unknown vendor"
+            }`,
     };
 
     setNotifications((prev) => [notification, ...prev].slice(0, 8));
@@ -193,6 +201,8 @@ function Dashboard() {
   };
 
   const handleSimulateAlert = async () => {
+    if (!canManageIncidents) return;
+
     try {
       setSimulatingAlert(true);
 
@@ -219,6 +229,8 @@ function Dashboard() {
   };
 
   const handleCreateManualAlert = async () => {
+    if (!canManageIncidents) return;
+
     try {
       setCreatingManualAlert(true);
 
@@ -241,7 +253,9 @@ function Dashboard() {
       setToast({
         open: true,
         severity: "success",
-        message: `Manual alert #${response.incident_id || response.id || "created"} created successfully.`,
+        message: `Manual alert #${
+          response.incident_id || response.id || "created"
+        } created successfully.`,
       });
     } catch (err) {
       setToast({
@@ -364,13 +378,20 @@ function Dashboard() {
         >
           <Stack spacing={1.5}>
             <Typography variant="body2">
-              API Base URL: {import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000"}
+              API Base URL:{" "}
+              {import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000"}
             </Typography>
+
             <Typography variant="body2">
-              WebSocket URL: {import.meta.env.VITE_WS_URL || "ws://127.0.0.1:8000/ws/incidents"}
+              WebSocket URL:{" "}
+              {import.meta.env.VITE_WS_URL ||
+                "ws://127.0.0.1:8000/ws/incidents"}
             </Typography>
+
+            <Typography variant="body2">Live Status: {liveStatus}</Typography>
+
             <Typography variant="body2">
-              Live Status: {liveStatus}
+              Current Role: {user?.role || "VIEWER"}
             </Typography>
           </Stack>
         </SectionCard>
@@ -380,12 +401,24 @@ function Dashboard() {
     return (
       <>
         <DashboardHeader
-          onSimulateAlert={handleSimulateAlert}
-          onOpenManualAlert={() => setManualAlertOpen(true)}
+          onSimulateAlert={
+            canManageIncidents ? handleSimulateAlert : undefined
+          }
+          onOpenManualAlert={
+            canManageIncidents
+              ? () => setManualAlertOpen(true)
+              : undefined
+          }
           simulatingAlert={simulatingAlert}
           liveStatus={liveStatus}
           liveEvent={liveEvent}
         />
+
+        {!canManageIncidents && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            You are signed in as VIEWER. Operational actions are hidden.
+          </Alert>
+        )}
 
         <KPICards
           incidents={incidents}
@@ -465,136 +498,138 @@ function Dashboard() {
           open={Boolean(selectedIncident)}
           incident={selectedIncident}
           onClose={() => setSelectedIncident(null)}
-          onResolve={resolveIncident}
+          onResolve={canManageIncidents ? resolveIncident : undefined}
         />
       </DashboardLayout>
 
-      <Dialog
-        open={manualAlertOpen}
-        onClose={() => setManualAlertOpen(false)}
-        fullWidth
-        maxWidth="sm"
-      >
-        <DialogTitle sx={{ fontWeight: 900 }}>
-          Create Manual Alert
-        </DialogTitle>
+      {canManageIncidents && (
+        <Dialog
+          open={manualAlertOpen}
+          onClose={() => setManualAlertOpen(false)}
+          fullWidth
+          maxWidth="sm"
+        >
+          <DialogTitle sx={{ fontWeight: 900 }}>
+            Create Manual Alert
+          </DialogTitle>
 
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <TextField
-              label="Vendor"
-              value={manualAlertForm.vendor}
-              onChange={(e) =>
-                setManualAlertForm((prev) => ({
-                  ...prev,
-                  vendor: e.target.value,
-                }))
-              }
-              fullWidth
-            />
+          <DialogContent>
+            <Stack spacing={2} sx={{ mt: 1 }}>
+              <TextField
+                label="Vendor"
+                value={manualAlertForm.vendor}
+                onChange={(e) =>
+                  setManualAlertForm((prev) => ({
+                    ...prev,
+                    vendor: e.target.value,
+                  }))
+                }
+                fullWidth
+              />
 
-            <TextField
-              label="Environment"
-              select
-              value={manualAlertForm.environment}
-              onChange={(e) =>
-                setManualAlertForm((prev) => ({
-                  ...prev,
-                  environment: e.target.value,
-                }))
-              }
-              fullWidth
+              <TextField
+                label="Environment"
+                select
+                value={manualAlertForm.environment}
+                onChange={(e) =>
+                  setManualAlertForm((prev) => ({
+                    ...prev,
+                    environment: e.target.value,
+                  }))
+                }
+                fullWidth
+              >
+                <MenuItem value="PROD">PROD</MenuItem>
+                <MenuItem value="UAT">UAT</MenuItem>
+                <MenuItem value="DEV">DEV</MenuItem>
+              </TextField>
+
+              <TextField
+                label="Severity"
+                select
+                value={manualAlertForm.severity}
+                onChange={(e) =>
+                  setManualAlertForm((prev) => ({
+                    ...prev,
+                    severity: e.target.value,
+                  }))
+                }
+                fullWidth
+              >
+                <MenuItem value="LOW">LOW</MenuItem>
+                <MenuItem value="MEDIUM">MEDIUM</MenuItem>
+                <MenuItem value="HIGH">HIGH</MenuItem>
+                <MenuItem value="CRITICAL">CRITICAL</MenuItem>
+              </TextField>
+
+              <TextField
+                label="Error Code"
+                value={manualAlertForm.error_code}
+                onChange={(e) =>
+                  setManualAlertForm((prev) => ({
+                    ...prev,
+                    error_code: e.target.value,
+                  }))
+                }
+                fullWidth
+              />
+
+              <TextField
+                label="Records Impacted"
+                type="number"
+                value={manualAlertForm.records_impacted}
+                onChange={(e) =>
+                  setManualAlertForm((prev) => ({
+                    ...prev,
+                    records_impacted: e.target.value,
+                  }))
+                }
+                fullWidth
+              />
+
+              <TextField
+                label="Amount Impacted"
+                type="number"
+                value={manualAlertForm.amount_impacted}
+                onChange={(e) =>
+                  setManualAlertForm((prev) => ({
+                    ...prev,
+                    amount_impacted: e.target.value,
+                  }))
+                }
+                fullWidth
+              />
+
+              <TextField
+                label="ACK Delay Minutes"
+                type="number"
+                value={manualAlertForm.ack_delay_minutes}
+                onChange={(e) =>
+                  setManualAlertForm((prev) => ({
+                    ...prev,
+                    ack_delay_minutes: e.target.value,
+                  }))
+                }
+                fullWidth
+              />
+            </Stack>
+          </DialogContent>
+
+          <DialogActions sx={{ px: 3, pb: 2 }}>
+            <Button onClick={() => setManualAlertOpen(false)}>
+              Cancel
+            </Button>
+
+            <Button
+              variant="contained"
+              onClick={handleCreateManualAlert}
+              disabled={creatingManualAlert}
             >
-              <MenuItem value="PROD">PROD</MenuItem>
-              <MenuItem value="UAT">UAT</MenuItem>
-              <MenuItem value="DEV">DEV</MenuItem>
-            </TextField>
-
-            <TextField
-              label="Severity"
-              select
-              value={manualAlertForm.severity}
-              onChange={(e) =>
-                setManualAlertForm((prev) => ({
-                  ...prev,
-                  severity: e.target.value,
-                }))
-              }
-              fullWidth
-            >
-              <MenuItem value="LOW">LOW</MenuItem>
-              <MenuItem value="MEDIUM">MEDIUM</MenuItem>
-              <MenuItem value="HIGH">HIGH</MenuItem>
-              <MenuItem value="CRITICAL">CRITICAL</MenuItem>
-            </TextField>
-
-            <TextField
-              label="Error Code"
-              value={manualAlertForm.error_code}
-              onChange={(e) =>
-                setManualAlertForm((prev) => ({
-                  ...prev,
-                  error_code: e.target.value,
-                }))
-              }
-              fullWidth
-            />
-
-            <TextField
-              label="Records Impacted"
-              type="number"
-              value={manualAlertForm.records_impacted}
-              onChange={(e) =>
-                setManualAlertForm((prev) => ({
-                  ...prev,
-                  records_impacted: e.target.value,
-                }))
-              }
-              fullWidth
-            />
-
-            <TextField
-              label="Amount Impacted"
-              type="number"
-              value={manualAlertForm.amount_impacted}
-              onChange={(e) =>
-                setManualAlertForm((prev) => ({
-                  ...prev,
-                  amount_impacted: e.target.value,
-                }))
-              }
-              fullWidth
-            />
-
-            <TextField
-              label="ACK Delay Minutes"
-              type="number"
-              value={manualAlertForm.ack_delay_minutes}
-              onChange={(e) =>
-                setManualAlertForm((prev) => ({
-                  ...prev,
-                  ack_delay_minutes: e.target.value,
-                }))
-              }
-              fullWidth
-            />
-          </Stack>
-        </DialogContent>
-
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setManualAlertOpen(false)}>
-            Cancel
-          </Button>
-
-          <Button
-            variant="contained"
-            onClick={handleCreateManualAlert}
-            disabled={creatingManualAlert}
-          >
-            {creatingManualAlert ? "Creating..." : "Create Alert"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+              {creatingManualAlert ? "Creating..." : "Create Alert"}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
 
       <Snackbar
         open={toast.open}
