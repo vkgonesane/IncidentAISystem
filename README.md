@@ -1,212 +1,452 @@
-# Incident AI System
+# VendorIQ — AI-Powered Vendor Incident Intelligence Platform
 
-An AI-assisted incident management platform designed to help engineering teams detect, analyze, and respond to production incidents faster.
+VendorIQ is a full-stack AIOps-inspired incident intelligence platform designed to help engineering, operations, and SRE teams detect, analyze, and respond to vendor and payment-processing incidents in real time.
 
-This project simulates how modern production systems automatically process alerts from monitoring tools, store incident data, and perform AI-based root cause analysis.
+The platform simulates how modern production systems ingest operational alerts, store incident data, perform AI-assisted analysis, monitor SLA breaches, and provide realtime operational visibility through a modern dashboard experience.
+
+---
+
+# Live Application
+
+### Frontend
+
+https://vendoriq-ai.vercel.app
+
+### Backend API
+
+https://vendoriq-api.onrender.com
+
+### Swagger Documentation
+
+https://vendoriq-api.onrender.com/docs
 
 ---
 
 # Project Goal
 
-Modern production environments rely on multiple vendors, APIs, and services. When failures occur, engineers often must manually:
+Modern enterprise systems rely heavily on external vendors, APIs, payment processors, and distributed services.
 
-- investigate logs
-- create incident reports
-- notify stakeholders
-- identify root causes
+When failures occur, engineering teams often need to manually:
 
-This project aims to automate that workflow using AI and backend engineering techniques.
+* investigate operational issues
+* analyze logs and alerts
+* identify root causes
+* evaluate business impact
+* track SLA breaches
+* notify stakeholders
+* coordinate incident response
 
-The system will:
+VendorIQ aims to automate and simplify that workflow using backend engineering, realtime systems, and AI-assisted operational intelligence.
 
-- ingest alerts from monitoring systems
-- create incidents automatically
-- store incidents in a database
-- run AI analysis on incident data
-- provide a dashboard for engineers
-- notify stakeholders of incidents
+The platform is designed to simulate enterprise-grade incident monitoring systems used in:
+
+* SRE environments
+* FinTech operations
+* Vendor management systems
+* Payment processing platforms
+* AIOps workflows
 
 ---
 
-# Architecture Overview
+# Key Features
 
+## Real-Time Incident Monitoring
+
+* Live operational dashboard
+* WebSocket-powered realtime updates
+* Auto-refresh monitoring
+* Simulated incident ingestion
+* Operational KPI tracking
+
+---
+
+## AI-Assisted Incident Intelligence
+
+* Risk scoring engine
+* Severity classification
+* Root-cause prediction
+* SLA breach analysis
+* Correlation scoring
+* AI-generated recommendations
+
+---
+
+## Vendor / ACH Monitoring
+
+* ACK delay monitoring
+* Payment-processing incident simulation
+* Vendor operational analysis
+* Impacted amount analysis
+* ACH workflow monitoring
+* SLA violation tracking
+
+---
+
+## Modern Operations Dashboard
+
+* KPI metric cards
+* Incident trend analytics
+* Alert source distribution
+* AI insights panel
+* Responsive enterprise UI
+* Material UI design system
+
+---
+
+## Backend APIs
+
+* Incident ingestion APIs
+* Dashboard analytics APIs
+* Trend APIs
+* Realtime websocket APIs
+* AI intelligence endpoints
+* Incident detail APIs
+
+---
+
+# System Architecture
+
+```text
+Monitoring Systems / Vendor Events
+                |
+                v
+      Incident Ingestion APIs
+           (FastAPI Backend)
+                |
+                v
+      PostgreSQL Database
+                |
+                v
+     AI Intelligence Engine
+                |
+                v
+ Realtime Dashboard + Analytics
+                |
+                v
+ React Frontend Dashboard
 ```
-Monitoring Tools
-        |
-        v
-Incident Ingestion API (FastAPI)
-        |
-        v
-Database (SQLite / PostgreSQL)
-        |
-        v
-AI Agent (Root Cause Analysis)
-        |
-        v
-Notification System
-        |
-        v
-Frontend Dashboard (React)
+
+---
+
+# AI Intelligence Engine
+
+VendorIQ uses a hybrid operational AI engine that performs:
+
+* Incident risk analysis
+* Severity prediction
+* Root-cause inference
+* SLA breach evaluation
+* Operational recommendation generation
+* Incident correlation analysis
+
+Example intelligence signals:
+
+* ACK delay duration
+* Vendor behavior patterns
+* Impacted transaction amount
+* Severity level
+* Error code analysis
+* Historical operational logic
+
+---
+
+# Example Incident Flow
+
+```text
+Vendor ACK Delay Detected
+            ↓
+Incident Created
+            ↓
+AI Risk Analysis Generated
+            ↓
+SLA Evaluation
+            ↓
+Realtime Dashboard Update
+            ↓
+Operational Recommendation Generated
 ```
 
 ---
 
 # Technology Stack
 
-Backend
+## Backend
 
-- Python
-- FastAPI
-- SQLAlchemy
-- SQLite (development)
-- PostgreSQL (planned)
+* Python
+* FastAPI
+* SQLAlchemy
+* Pydantic
+* WebSockets
+* Uvicorn
 
-Frontend (planned)
+---
 
-- React
-- Axios
-- Material UI / Tailwind
+## Frontend
 
-AI / ML (planned)
+* React
+* Vite
+* Material UI
+* Axios
+* Recharts
 
-- OpenAI API or LLM
-- NLP-based log analysis
-- Vector search for incident similarity
+---
+
+## Database
+
+### Development
+
+* SQLite
+
+### Production
+
+* PostgreSQL
+
+---
+
+## Deployment
+
+### Frontend Hosting
+
+* Vercel
+
+### Backend Hosting
+
+* Render
+
+### Database Hosting
+
+* Render PostgreSQL
 
 ---
 
 # Project Structure
 
-```
+```text
 Incident-AI-System
 │
 ├── backend
 │   ├── app
 │   │   ├── database
 │   │   │   └── db.py
+│   │   │
 │   │   ├── models
-│   │   │   └── incident.py
+│   │   │   ├── incident.py
+│   │   │   ├── ai_analysis.py
+│   │   │   └── incident_update.py
+│   │   │
 │   │   ├── routes
-│   │   │   └── alerts.py
+│   │   │   ├── alerts.py
+│   │   │   ├── dashboard.py
+│   │   │   ├── incidents.py
+│   │   │   ├── intelligence.py
+│   │   │   ├── monitoring.py
+│   │   │   └── realtime.py
+│   │   │
 │   │   ├── schemas
-│   │   │   └── alert_schema.py
+│   │   │
 │   │   ├── services
-│   │   │   └── ai_agent.py
+│   │   │   ├── ai_agent.py
+│   │   │   └── websocket_manager.py
+│   │   │
 │   │   └── main.py
 │   │
-│   ├── incidents.db
 │   └── requirements.txt
 │
-├── frontend (planned)
+├── frontend
+│   ├── src
+│   │   ├── components
+│   │   ├── pages
+│   │   ├── services
+│   │   └── charts
+│   │
+│   └── package.json
 │
 └── docs
-    ├── architecture.md
-    ├── development-notes.md
-    └── learning-log.md
 ```
 
 ---
 
 # Backend Setup
 
-Clone the repository:
+## Clone Repository
 
-```
-git clone https://github.com/vkgonesane/incident-ai-system.git
-```
-
-Navigate to the backend folder:
-
-```
-cd Incident-AI-System/backend
+```bash
+git clone https://github.com/vkgonesane/IncidentAISystem.git
 ```
 
-Create a virtual environment:
+---
 
+## Navigate to Backend
+
+```bash
+cd backend
 ```
+
+---
+
+## Create Virtual Environment
+
+```bash
 python -m venv venv
 ```
 
-Activate the environment:
+---
 
-Windows
+## Activate Environment
 
-```
+### Windows
+
+```bash
 venv\Scripts\activate
 ```
 
-Install dependencies:
+---
 
-```
-pip install fastapi uvicorn sqlalchemy pydantic
+## Install Dependencies
+
+```bash
+pip install -r requirements.txt
 ```
 
-Run the server:
+---
 
-```
+## Run Backend Server
+
+```bash
 uvicorn app.main:app --reload
+```
+
+Backend runs on:
+
+```text
+http://127.0.0.1:8000
+```
+
+---
+
+# Frontend Setup
+
+## Navigate to Frontend
+
+```bash
+cd frontend
+```
+
+---
+
+## Install Dependencies
+
+```bash
+npm install
+```
+
+---
+
+## Start Frontend
+
+```bash
+npm run dev
+```
+
+Frontend runs on:
+
+```text
+http://localhost:5173
+```
+
+---
+
+# Environment Variables
+
+## Backend `.env`
+
+```env
+DATABASE_URL=your_database_url
+CORS_ORIGINS=http://localhost:5173
+```
+
+---
+
+## Frontend `.env`
+
+```env
+VITE_API_BASE_URL=http://127.0.0.1:8000
+VITE_WS_URL=ws://127.0.0.1:8000/ws/incidents
 ```
 
 ---
 
 # API Documentation
 
-Once the server is running, visit:
+FastAPI automatically generates Swagger documentation.
 
-```
-http://127.0.0.1:8000/docs
-```
+Available at:
 
-FastAPI automatically generates Swagger documentation for all endpoints.
+```text
+https://vendoriq-api.onrender.com/docs
+```
 
 ---
 
 # Current Features
 
-- FastAPI backend server
-- SQLAlchemy ORM integration
-- SQLite database setup
-- Incident database model
-- Automatic table creation
-- API documentation via Swagger
+* FastAPI backend APIs
+* SQLAlchemy ORM integration
+* PostgreSQL production database
+* Realtime websocket updates
+* AI-assisted incident intelligence
+* Incident monitoring dashboard
+* SLA breach monitoring
+* Vendor incident simulation
+* Dashboard analytics APIs
+* Production deployment setup
 
 ---
 
 # Planned Features
 
-- Alert ingestion API
-- Incident creation API
-- AI-based root cause suggestions
-- Log summarization
-- Incident similarity detection
-- Notification system (Slack / Email / Teams)
-- React dashboard
-- PostgreSQL database support
+* JWT Authentication
+* Role-Based Access Control (RBAC)
+* ML-based anomaly detection
+* Vector similarity search
+* LLM-powered incident summaries
+* Docker containerization
+* CI/CD pipelines
+* Prometheus + Grafana monitoring
+* Slack / Teams notifications
+* Dynatrace / Splunk integration
 
 ---
 
 # Learning Goals
 
-This project is designed to explore real-world backend engineering concepts including:
+This project explores real-world backend and operational engineering concepts including:
 
-- API design
-- database modeling
-- clean backend architecture
-- AI-assisted automation
-- incident management systems
+* API design
+* scalable backend architecture
+* realtime systems
+* database modeling
+* AI-assisted automation
+* operational intelligence systems
+* production deployment workflows
+* AIOps-inspired architectures
 
 ---
 
 # Future Improvements
 
-- integrate monitoring tools (Dynatrace / Prometheus)
-- add AI log analysis
-- add vector database for incident similarity
-- deploy backend using Docker
-- build a full React dashboard
+* integrate monitoring platforms
+* improve AI correlation engine
+* add semantic incident similarity
+* implement production authentication
+* support distributed event streaming
+* optimize realtime websocket scaling
+* introduce observability tooling
 
 ---
 
 # Author
 
-Built as a learning project for backend and AI engineering.
+## Vaibhav
+
+Built as a portfolio-grade backend and AI engineering project inspired by enterprise incident management and operational intelligence systems.
