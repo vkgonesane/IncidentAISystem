@@ -22,7 +22,6 @@ https://vendoriq-api.onrender.com/docs
 # Key Features
 
 ## Real-Time Incident Monitoring
-
 - Live operational dashboard
 - Realtime WebSocket updates
 - Auto-refresh monitoring
@@ -31,7 +30,6 @@ https://vendoriq-api.onrender.com/docs
 ---
 
 ## AI-Assisted Risk Intelligence
-
 - Risk scoring engine
 - Severity classification
 - SLA breach detection
@@ -42,7 +40,6 @@ https://vendoriq-api.onrender.com/docs
 ---
 
 ## Vendor / ACH Monitoring
-
 - ACK delay monitoring
 - Payment processing incident tracking
 - Amount impacted analysis
@@ -52,7 +49,6 @@ https://vendoriq-api.onrender.com/docs
 ---
 
 ## Modern Operations Dashboard
-
 - KPI cards
 - Incident trend analytics
 - Alert source distribution
@@ -63,7 +59,6 @@ https://vendoriq-api.onrender.com/docs
 ---
 
 ## Backend APIs
-
 - Incident ingestion APIs
 - Dashboard summary APIs
 - Trend APIs
@@ -76,28 +71,30 @@ https://vendoriq-api.onrender.com/docs
 # Tech Stack
 
 ## Frontend
-
 - React
 - Vite
 - Material UI
 - Axios
 - Recharts
 
-## Backend
+---
 
+## Backend
 - FastAPI
 - SQLAlchemy
 - Pydantic
 - WebSockets
 - Uvicorn
 
-## Database
+---
 
+## Database
 - PostgreSQL (Production)
 - SQLite (Local Development)
 
-## Deployment
+---
 
+## Deployment
 - Vercel (Frontend)
 - Render (Backend + PostgreSQL)
 
@@ -115,182 +112,3 @@ FastAPI Backend
 AI Intelligence Engine
         ↓
 PostgreSQL Database
-```
-
----
-
-# AI Intelligence Engine
-
-VendorIQ uses a hybrid operational AI engine that performs:
-
-- Incident risk analysis
-- Severity prediction
-- SLA breach analysis
-- Root-cause inference
-- Operational recommendation generation
-- Incident correlation analysis
-
-Example intelligence signals:
-
-- ACK delay duration
-- Vendor behavior
-- Impacted amount
-- Severity level
-- Error code patterns
-- Historical operational logic
-
----
-
-# Example Incident Flow
-
-```text
-Vendor ACK Delay Detected
-        ↓
-Incident Created
-        ↓
-AI Risk Analysis Generated
-        ↓
-SLA Evaluation
-        ↓
-Realtime Dashboard Update
-        ↓
-Operational Recommendation Generated
-```
-
----
-
-# Local Development Setup
-
-## Clone Repository
-
-```bash
-git clone https://github.com/vkgonesane/IncidentAISystem.git
-```
-
----
-
-# Backend Setup
-
-```bash
-cd backend
-
-python -m venv venv
-
-venv\Scripts\activate
-
-pip install -r requirements.txt
-
-uvicorn app.main:app --reload
-```
-
-Backend runs on:
-
-```text
-http://127.0.0.1:8000
-```
-
----
-
-# Frontend Setup
-
-```bash
-cd frontend
-
-npm install
-
-npm run dev
-```
-
-Frontend runs on:
-
-```text
-http://localhost:5173
-```
-
----
-
-# Environment Variables
-
-## Backend
-
-Create `.env`
-
-```env
-DATABASE_URL=your_database_url
-CORS_ORIGINS=http://localhost:5173
-```
-
-## Frontend
-
-Create `.env`
-
-```env
-VITE_API_BASE_URL=http://127.0.0.1:8000
-VITE_WS_URL=ws://127.0.0.1:8000/ws/incidents
-```
-
----
-
-# API Endpoints
-
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/health` | API health |
-| GET | `/incidents` | Get incidents |
-| GET | `/dashboard/summary` | Dashboard KPIs |
-| GET | `/incidents/trend` | Incident trends |
-| POST | `/alerts/simulate` | Simulate incident |
-| PUT | `/incidents/{id}` | Update incident |
-| WS | `/ws/incidents` | Realtime updates |
-
----
-
-# Production Highlights
-
-- Production frontend deployment
-- Production backend deployment
-- Realtime websocket infrastructure
-- PostgreSQL cloud database
-- AI-assisted operational intelligence
-- Enterprise-inspired monitoring architecture
-
----
-
-# Future Enhancements
-
-- JWT Authentication
-- Role-Based Access Control (RBAC)
-- ML-based anomaly detection
-- Vector similarity search
-- LLM-powered incident summaries
-- Docker containerization
-- CI/CD pipelines
-- Prometheus + Grafana monitoring
-
----
-
-# Why This Project?
-
-VendorIQ was built to simulate real-world operational intelligence systems used by:
-
-- SRE teams
-- FinTech operations teams
-- Incident management teams
-- Vendor monitoring systems
-- Payment processing platforms
-
-The project focuses heavily on:
-
-- backend engineering
-- realtime systems
-- operational intelligence
-- AIOps-inspired architecture
-- production deployment practices
-
----
-
-# Author
-
-## Vaibhav
-
-Built as a portfolio-grade AIOps and operational intelligence platform inspired by enterprise incident management systems.
