@@ -12,24 +12,43 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+
 import QueueOutlinedIcon from "@mui/icons-material/QueueOutlined";
 
 import EmptyState from "../common/EmptyState";
 import LoadingSpinner from "../common/LoadingSpinner";
 import IncidentRow from "./IncidentRow";
 
-function IncidentTable({ incidents, loading, error, onIncidentClick }) {
+function IncidentTable({
+  incidents = [],
+  loading,
+  error,
+  onIncidentClick,
+}) {
   if (loading) {
     return (
-      <Card>
-        <LoadingSpinner message="Loading incidents from FastAPI..." />
+      <Card
+        sx={{
+          borderRadius: 5,
+          border: "1px solid #e2e8f0",
+          boxShadow: "0 4px 18px rgba(15,23,42,0.035)",
+        }}
+      >
+        <LoadingSpinner message="Loading operational incidents..." />
       </Card>
     );
   }
 
   if (error) {
     return (
-      <Alert severity="error" sx={{ mb: 3 }}>
+      <Alert
+        severity="error"
+        sx={{
+          mb: 3,
+          borderRadius: 3,
+          fontWeight: 700,
+        }}
+      >
         {error}
       </Alert>
     );
@@ -38,84 +57,121 @@ function IncidentTable({ incidents, loading, error, onIncidentClick }) {
   return (
     <Card
       sx={{
-        border: "1px solid #e2e8f0",
-        borderRadius: 4,
-        boxShadow: "0 1px 3px rgba(15, 23, 42, 0.08)",
+        border: "1px solid rgba(226,232,240,0.9)",
+        borderRadius: 5,
+        boxShadow: "0 4px 18px rgba(15,23,42,0.035)",
         overflow: "hidden",
+        backgroundColor: "#ffffff",
       }}
     >
       <CardContent sx={{ p: 0 }}>
         <Box
           sx={{
-            px: 2.5,
-            py: 2,
+            px: { xs: 2, md: 3 },
+            py: 2.5,
             display: "flex",
-            alignItems: "center",
+            alignItems: {
+              xs: "flex-start",
+              md: "center",
+            },
             justifyContent: "space-between",
+            gap: 2,
             borderBottom: "1px solid #e2e8f0",
-            backgroundColor: "#ffffff",
+            background:
+              "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+            }}
+          >
             <Box
               sx={{
-                width: 36,
-                height: 36,
-                borderRadius: 2,
-                backgroundColor: "#ecfdf5",
-                color: "#059669",
+                width: 42,
+                height: 42,
+                borderRadius: 3,
+                backgroundColor: "rgba(16,185,129,0.10)",
+                color: "#047857",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                border: "1px solid #a7f3d0",
+                border: "1px solid rgba(16,185,129,0.16)",
               }}
             >
               <QueueOutlinedIcon fontSize="small" />
             </Box>
 
             <Box>
-              <Typography variant="h6" sx={{ fontWeight: 950 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 900,
+                  color: "#0f172a",
+                  letterSpacing: "-0.03em",
+                }}
+              >
                 Incident Queue
               </Typography>
 
-              <Typography variant="body2" color="text.secondary">
-                Prioritized operational alerts enriched with SLA, impact, and AI signals
+              <Typography
+                sx={{
+                  mt: 0.4,
+                  color: "#64748b",
+                  fontSize: 13,
+                  lineHeight: 1.6,
+                }}
+              >
+                Operational incidents enriched with SLA, impact, source, and AI signals.
               </Typography>
             </Box>
           </Box>
 
           <Chip
             size="small"
-            label={`${incidents.length} active records`}
+            label={`${incidents.length} records`}
             sx={{
-              backgroundColor: "#f1f5f9",
-              color: "#334155",
+              backgroundColor: "#f8fafc",
+              color: "#475569",
               fontWeight: 800,
-              border: "1px solid #cbd5e1",
+              border: "1px solid #e2e8f0",
             }}
           />
         </Box>
 
         {incidents.length === 0 ? (
           <EmptyState
-            title="No incidents found"
-            description="Try changing filters or check if backend has incident data."
+            title="No operational incidents found"
+            description="There are no incidents matching the current filters."
           />
         ) : (
-          <TableContainer>
-            <Table>
+          <TableContainer
+            sx={{
+              maxWidth: "100%",
+              overflowX: "auto",
+            }}
+          >
+            <Table
+              sx={{
+                minWidth: 1100,
+              }}
+            >
               <TableHead>
                 <TableRow
                   sx={{
                     backgroundColor: "#f8fafc",
+
                     "& th": {
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: 900,
-                      color: "#475569",
+                      color: "#64748b",
                       textTransform: "uppercase",
-                      letterSpacing: "0.04em",
+                      letterSpacing: "0.06em",
                       borderBottom: "1px solid #e2e8f0",
-                      py: 1.4,
+                      py: 1.6,
+                      whiteSpace: "nowrap",
                     },
                   }}
                 >
@@ -131,7 +187,22 @@ function IncidentTable({ incidents, loading, error, onIncidentClick }) {
                 </TableRow>
               </TableHead>
 
-              <TableBody>
+              <TableBody
+                sx={{
+                  "& tr": {
+                    transition: "background-color 0.2s ease",
+                  },
+
+                  "& tr:hover": {
+                    backgroundColor: "#f8fafc",
+                  },
+
+                  "& td": {
+                    borderBottom: "1px solid #f1f5f9",
+                    py: 1.8,
+                  },
+                }}
+              >
                 {incidents.map((incident) => (
                   <IncidentRow
                     key={incident.id}

@@ -13,86 +13,160 @@ import {
   getConfidenceLabel,
   safeText,
 } from "../../utils/formatters";
+
 import SeverityChip from "../incident/SeverityChip";
 import StatusChip from "../incident/StatusChip";
 import SourceBadge from "../incident/SourceBadge";
 import DuplicateBadge from "../incident/DuplicateBadge";
 
 function getSlaStyles(slaStatus) {
-  const status = String(slaStatus || "").toUpperCase();
+  const status = String(
+    slaStatus || ""
+  ).toUpperCase();
 
   if (status === "BREACHED") {
     return {
-      label: "SLA Breached",
-      bg: "#fee2e2",
-      color: "#991b1b",
-      border: "#fecaca",
+      label: "BREACHED",
+      bg: "rgba(239,68,68,0.10)",
+      color: "#b91c1c",
+      border:
+        "rgba(239,68,68,0.18)",
     };
   }
 
   if (status === "AT_RISK") {
     return {
-      label: "SLA At Risk",
-      bg: "#ffedd5",
-      color: "#9a3412",
-      border: "#fed7aa",
+      label: "AT RISK",
+      bg: "rgba(245,158,11,0.10)",
+      color: "#b45309",
+      border:
+        "rgba(245,158,11,0.18)",
     };
   }
 
   return {
-    label: "SLA Within",
-    bg: "#ecfdf5",
-    color: "#065f46",
-    border: "#a7f3d0",
+    label: "WITHIN SLA",
+    bg: "rgba(16,185,129,0.10)",
+    color: "#047857",
+    border:
+      "rgba(16,185,129,0.18)",
   };
 }
 
 function formatAmount(value) {
-  const numberValue = Number(value || 0);
+  const numberValue = Number(
+    value || 0
+  );
 
   if (numberValue >= 10000000) {
-    return `$${(numberValue / 10000000).toFixed(1)}Cr`;
+    return `$${(
+      numberValue / 10000000
+    ).toFixed(1)}Cr`;
   }
 
   if (numberValue >= 100000) {
-    return `$${(numberValue / 100000).toFixed(1)}L`;
+    return `$${(
+      numberValue / 100000
+    ).toFixed(1)}L`;
   }
 
   return `$${numberValue.toLocaleString()}`;
 }
 
-function IncidentRow({ incident, onClick }) {
-  const confidence = incident?.ai_analysis?.confidence;
-  const numericConfidence = Number(confidence || 0);
-  const confidenceValue =
-    numericConfidence <= 1 ? numericConfidence * 100 : numericConfidence;
+function IncidentRow({
+  incident,
+  onClick,
+}) {
+  const confidence =
+    incident?.ai_analysis
+      ?.confidence;
 
-  const slaMeta = getSlaStyles(incident?.sla_status);
+  const numericConfidence =
+    Number(confidence || 0);
+
+  const confidenceValue =
+    numericConfidence <= 1
+      ? numericConfidence * 100
+      : numericConfidence;
+
+  const slaMeta =
+    getSlaStyles(
+      incident?.sla_status
+    );
 
   return (
     <TableRow
       hover
-      onClick={() => onClick(incident)}
+      onClick={() =>
+        onClick(incident)
+      }
       sx={{
         cursor: "pointer",
+
+        transition:
+          "background-color 0.18s ease",
+
         "& td": {
-          borderBottom: "1px solid #eef2f7",
-          py: 1.7,
+          borderBottom:
+            "1px solid #f1f5f9",
+
+          py: 2,
         },
+
         "&:hover": {
-          backgroundColor: "#f8fafc",
+          backgroundColor:
+            "#f8fafc",
         },
       }}
     >
       <TableCell>
         <Box>
-          <Typography variant="body2" sx={{ fontWeight: 950, color: "#0f172a" }}>
-            #{incident.id} · {safeText(incident.error_code, "Incident alert")}
+          <Typography
+            sx={{
+              fontSize: 14,
+
+              fontWeight: 850,
+
+              color: "#0f172a",
+
+              letterSpacing:
+                "-0.01em",
+            }}
+          >
+            #{incident.id} ·{" "}
+            {safeText(
+              incident.error_code,
+              "Incident alert"
+            )}
           </Typography>
 
-          <Typography variant="caption" color="text.secondary">
+          <Typography
+            sx={{
+              mt: 0.5,
+
+              color: "#64748b",
+
+              fontSize: 12,
+
+              lineHeight: 1.6,
+
+              maxWidth: 320,
+
+              display:
+                "-webkit-box",
+
+              overflow: "hidden",
+
+              WebkitLineClamp: 2,
+
+              WebkitBoxOrient:
+                "vertical",
+            }}
+          >
             {safeText(
-              incident.ai_analysis?.root_cause || incident.description,
+              incident.ai_analysis
+                ?.root_cause ||
+                incident.description,
               "Click to inspect incident intelligence"
             )}
           </Typography>
@@ -100,87 +174,207 @@ function IncidentRow({ incident, onClick }) {
       </TableCell>
 
       <TableCell>
-        <SeverityChip severity={incident.severity} />
+        <SeverityChip
+          severity={
+            incident.severity
+          }
+        />
       </TableCell>
 
       <TableCell>
-        <StatusChip status={incident.status} />
+        <StatusChip
+          status={incident.status}
+        />
       </TableCell>
 
       <TableCell>
-        <Typography variant="body2" sx={{ fontWeight: 800 }}>
-          {safeText(incident.vendor)}
+        <Typography
+          sx={{
+            fontSize: 13,
+
+            fontWeight: 800,
+
+            color: "#0f172a",
+          }}
+        >
+          {safeText(
+            incident.vendor
+          )}
         </Typography>
 
-        <Typography variant="caption" color="text.secondary">
-          {safeText(incident.environment)}
+        <Typography
+          sx={{
+            mt: 0.4,
+
+            color: "#94a3b8",
+
+            fontSize: 11,
+
+            fontWeight: 700,
+          }}
+        >
+          {safeText(
+            incident.environment
+          )}
         </Typography>
       </TableCell>
 
       <TableCell>
-        <Stack spacing={0.7}>
+        <Stack spacing={0.8}>
           <Chip
             size="small"
             label={slaMeta.label}
             sx={{
               width: "fit-content",
-              backgroundColor: slaMeta.bg,
-              color: slaMeta.color,
+
+              backgroundColor:
+                slaMeta.bg,
+
+              color:
+                slaMeta.color,
+
               border: `1px solid ${slaMeta.border}`,
+
               fontWeight: 800,
+
+              fontSize: 11,
             }}
           />
 
-          <Typography variant="caption" color="text.secondary">
-            ACK delay: {incident.ack_delay_minutes || 0} mins
+          <Typography
+            sx={{
+              fontSize: 11,
+
+              color: "#94a3b8",
+
+              fontWeight: 700,
+            }}
+          >
+            ACK delay ·{" "}
+            {incident.ack_delay_minutes ||
+              0}{" "}
+            mins
           </Typography>
         </Stack>
       </TableCell>
 
       <TableCell>
-        <Stack spacing={0.5}>
-          <Typography variant="body2" sx={{ fontWeight: 850 }}>
-            {formatAmount(incident.amount_impacted)}
+        <Stack spacing={0.6}>
+          <Typography
+            sx={{
+              fontSize: 13,
+
+              fontWeight: 850,
+
+              color: "#0f172a",
+            }}
+          >
+            {formatAmount(
+              incident.amount_impacted
+            )}
           </Typography>
 
-          <Typography variant="caption" color="text.secondary">
-            {Number(incident.records_impacted || 0).toLocaleString()} records
+          <Typography
+            sx={{
+              fontSize: 11,
+
+              color: "#94a3b8",
+
+              fontWeight: 700,
+            }}
+          >
+            {Number(
+              incident.records_impacted ||
+                0
+            ).toLocaleString()}{" "}
+            records
           </Typography>
         </Stack>
       </TableCell>
 
       <TableCell>
-        <Stack spacing={0.7}>
-          <SourceBadge sourceType={incident.source_type} />
-          <DuplicateBadge duplicateCount={incident.duplicate_count} />
+        <Stack spacing={0.8}>
+          <SourceBadge
+            sourceType={
+              incident.source_type
+            }
+          />
+
+          <DuplicateBadge
+            duplicateCount={
+              incident.duplicate_count
+            }
+          />
         </Stack>
       </TableCell>
 
       <TableCell>
-        <Stack spacing={0.7}>
-          <Typography variant="caption" sx={{ fontWeight: 900 }}>
-            {getConfidenceLabel(confidence)}
+        <Stack spacing={0.8}>
+          <Typography
+            sx={{
+              fontSize: 11,
+
+              fontWeight: 900,
+
+              color: "#334155",
+
+              letterSpacing:
+                "0.02em",
+            }}
+          >
+            {getConfidenceLabel(
+              confidence
+            )}
           </Typography>
 
           <LinearProgress
             variant="determinate"
-            value={Number.isNaN(confidenceValue) ? 0 : Math.min(confidenceValue, 100)}
+            value={
+              Number.isNaN(
+                confidenceValue
+              )
+                ? 0
+                : Math.min(
+                    confidenceValue,
+                    100
+                  )
+            }
             sx={{
-              width: 92,
-              height: 7,
-              borderRadius: 99,
-              backgroundColor: "#e2e8f0",
-              "& .MuiLinearProgress-bar": {
-                backgroundColor: "#059669",
-              },
+              width: 88,
+
+              height: 6,
+
+              borderRadius: 999,
+
+              backgroundColor:
+                "#e2e8f0",
+
+              "& .MuiLinearProgress-bar":
+                {
+                  backgroundColor:
+                    "#10b981",
+                },
             }}
           />
         </Stack>
       </TableCell>
 
       <TableCell>
-        <Typography variant="body2" sx={{ fontWeight: 800 }}>
-          {formatRelativeTime(incident.last_seen_at || incident.created_at)}
+        <Typography
+          sx={{
+            fontSize: 12,
+
+            fontWeight: 800,
+
+            color: "#475569",
+
+            whiteSpace: "nowrap",
+          }}
+        >
+          {formatRelativeTime(
+            incident.last_seen_at ||
+              incident.created_at
+          )}
         </Typography>
       </TableCell>
     </TableRow>
