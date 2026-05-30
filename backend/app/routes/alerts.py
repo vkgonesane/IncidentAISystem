@@ -5,26 +5,20 @@ import random
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.database.db import SessionLocal
+from app.database.db import get_db
 from app.models.ai_analysis import AIAnalysis
 from app.models.incident import Incident
 from app.models.incident_update import IncidentUpdate
+from app.models.user import User
 from app.schemas.alert_schema import AlertCreate
 from app.services.ai_agent import analyze_incident
 from app.services.anomaly_service import is_anomaly_alert
 from app.services.email_service import send_email_notification
 from app.services.sla_service import get_sla_status
 from app.services.websocket_manager import websocket_manager
+from app.utils.auth_dependencies import require_roles
 
 router = APIRouter()
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 def add_incident_update(
@@ -217,7 +211,12 @@ async def create_alert(
 
 
 @router.post("/alerts/simulate")
-async def simulate_alert(db: Session = Depends(get_db)):
+async def simulate_alert(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_roles(["ADMIN", "OPERATOR"])
+    ),
+):
     vendors = ["Pfizer", "Cigna", "UnitedHealth", "Aetna", "Humana"]
 
     systems = [

@@ -1,24 +1,26 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from app.database.db import SessionLocal
+from app.database.db import get_db
+
 from app.models.incident import Incident
 from app.models.incident_update import IncidentUpdate
+from app.models.user import User
+
 from app.schemas.incident_schema import (
     IncidentResponse,
     IncidentUpdate as IncidentUpdateSchema,
 )
-from app.schemas.incident_update_schema import IncidentUpdateResponse
+
+from app.schemas.incident_update_schema import (
+    IncidentUpdateResponse,
+)
+
+from app.utils.auth_dependencies import (
+    require_roles,
+)
 
 router = APIRouter()
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 def add_incident_update(
@@ -34,7 +36,9 @@ def add_incident_update(
         message=message,
         created_by=created_by,
     )
+
     db.add(update)
+
     return update
 
 
@@ -48,6 +52,9 @@ def get_incidents(
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_roles(["ADMIN", "OPERATOR", "VIEWER"])
+    ),
 ):
     query = db.query(Incident)
 
@@ -76,11 +83,22 @@ def get_incidents(
 
 
 @router.get("/incidents/{incident_id}", response_model=IncidentResponse)
-def get_incident_by_id(incident_id: int, db: Session = Depends(get_db)):
-    incident = db.query(Incident).filter(Incident.id == incident_id).first()
+def get_incident_by_id(
+    incident_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_roles(["ADMIN", "OPERATOR", "VIEWER"])
+    ),
+):
+    incident = db.query(Incident).filter(
+        Incident.id == incident_id
+    ).first()
 
     if incident is None:
-        raise HTTPException(status_code=404, detail="Incident not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Incident not found"
+        )
 
     return incident
 
@@ -90,11 +108,19 @@ def update_incident(
     incident_id: int,
     incident_data: IncidentUpdateSchema,
     db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_roles(["ADMIN", "OPERATOR"])
+    ),
 ):
-    incident = db.query(Incident).filter(Incident.id == incident_id).first()
+    incident = db.query(Incident).filter(
+        Incident.id == incident_id
+    ).first()
 
     if incident is None:
-        raise HTTPException(status_code=404, detail="Incident not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Incident not found"
+        )
 
     old_status = incident.status
     old_assignee = incident.assignee
@@ -117,25 +143,44 @@ def update_incident(
     if incident_data.assignee is not None:
         incident.assignee = incident_data.assignee
 
-    if incident_data.status is not None and old_status != incident.status:
+    if (
+        incident_data.status is not None
+        and old_status != incident.status
+    ):
         add_incident_update(
             db=db,
             incident_id=incident.id,
             update_type="STATUS_CHANGE",
-            message=f"Status changed from {old_status} to {incident.status}.",
-            created_by="USER",
+            message=(
+                f"Status changed from "
+                f"{old_status} to {incident.status}."
+            ),
+            created_by=current_user.email,
         )
 
-    if incident_data.assignee is not None and old_assignee != incident.assignee:
-        previous_assignee = old_assignee if old_assignee else "Unassigned"
-        new_assignee = incident.assignee if incident.assignee else "Unassigned"
+    if (
+        incident_data.assignee is not None
+        and old_assignee != incident.assignee
+    ):
+        previous_assignee = (
+            old_assignee if old_assignee else "Unassigned"
+        )
+
+        new_assignee = (
+            incident.assignee
+            if incident.assignee
+            else "Unassigned"
+        )
 
         add_incident_update(
             db=db,
             incident_id=incident.id,
             update_type="ASSIGNEE_CHANGE",
-            message=f"Assignee changed from {previous_assignee} to {new_assignee}.",
-            created_by="USER",
+            message=(
+                f"Assignee changed from "
+                f"{previous_assignee} to {new_assignee}."
+            ),
+            created_by=current_user.email,
         )
 
     db.commit()
@@ -144,33 +189,68 @@ def update_incident(
     return incident
 
 
-@router.get("/incidents/{incident_id}/similar", response_model=list[IncidentResponse])
-def get_similar_incidents(incident_id: int, db: Session = Depends(get_db)):
-    current_incident = db.query(Incident).filter(Incident.id == incident_id).first()
+@router.get(
+    "/incidents/{incident_id}/similar",
+    response_model=list[IncidentResponse]
+)
+def get_similar_incidents(
+    incident_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_roles(["ADMIN", "OPERATOR", "VIEWER"])
+    ),
+):
+    current_incident = db.query(Incident).filter(
+        Incident.id == incident_id
+    ).first()
 
     if current_incident is None:
-        raise HTTPException(status_code=404, detail="Incident not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Incident not found"
+        )
 
     return (
         db.query(Incident)
         .filter(Incident.id != incident_id)
-        .filter(Incident.vendor == current_incident.vendor)
-        .filter(Incident.error_code == current_incident.error_code)
+        .filter(
+            Incident.vendor == current_incident.vendor
+        )
+        .filter(
+            Incident.error_code
+            == current_incident.error_code
+        )
         .order_by(Incident.created_at.desc())
         .all()
     )
 
 
-@router.get("/incidents/{incident_id}/timeline", response_model=list[IncidentUpdateResponse])
-def get_incident_timeline(incident_id: int, db: Session = Depends(get_db)):
-    incident = db.query(Incident).filter(Incident.id == incident_id).first()
+@router.get(
+    "/incidents/{incident_id}/timeline",
+    response_model=list[IncidentUpdateResponse]
+)
+def get_incident_timeline(
+    incident_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_roles(["ADMIN", "OPERATOR", "VIEWER"])
+    ),
+):
+    incident = db.query(Incident).filter(
+        Incident.id == incident_id
+    ).first()
 
     if incident is None:
-        raise HTTPException(status_code=404, detail="Incident not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Incident not found"
+        )
 
     return (
         db.query(IncidentUpdate)
-        .filter(IncidentUpdate.incident_id == incident_id)
+        .filter(
+            IncidentUpdate.incident_id == incident_id
+        )
         .order_by(IncidentUpdate.created_at.asc())
         .all()
     )

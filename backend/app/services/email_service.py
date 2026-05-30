@@ -1,17 +1,32 @@
 import os
 import smtplib
+
 from email.message import EmailMessage
 
 from dotenv import load_dotenv
+from sqlalchemy.orm import Session
+
+from app.database.db import SessionLocal
+
+from app.models.notification_recipient import (
+    NotificationRecipient
+)
 
 load_dotenv()
 
 
-def build_incident_email(incident, ai_result=None):
-    subject = f"[INCIDENT ALERT] {incident.vendor} - {incident.severity}"
+def build_incident_email(
+    incident,
+    ai_result=None
+):
+    subject = (
+        f"[INCIDENT ALERT] "
+        f"{incident.vendor} - "
+        f"{incident.severity}"
+    )
 
     body = f"""
-Incident Created Successfully
+VendorIQ Incident Alert
 
 Incident ID: {incident.id}
 Vendor: {incident.vendor}
@@ -20,13 +35,14 @@ Severity: {incident.severity}
 Error Code: {incident.error_code}
 Status: {incident.status}
 Created At: {incident.created_at}
+
+========================================
 """.strip()
 
-    # Add AI insights
     if ai_result:
         body += f"""
 
-================ AI ANALYSIS ================
+AI ANALYSIS
 
 Root Cause:
 {ai_result.get("root_cause")}
@@ -41,46 +57,143 @@ Recommendation:
     return subject, body
 
 
-def send_email_notification(incident, ai_result=None):
-    subject, body = build_incident_email(incident, ai_result)
+def get_vendor_recipients(
+    vendor: str
+):
+    db: Session = SessionLocal()
+
+    try:
+        recipients = (
+            db.query(NotificationRecipient)
+            .filter(
+                NotificationRecipient.vendor
+                == vendor,
+                NotificationRecipient.is_active
+                == True
+            )
+            .all()
+        )
+
+        return [
+            recipient.email
+            for recipient in recipients
+        ]
+
+    finally:
+        db.close()
+
+
+def send_email_notification(
+    incident,
+    ai_result=None
+):
+    subject, body = build_incident_email(
+        incident,
+        ai_result
+    )
 
     smtp_host = os.getenv("SMTP_HOST")
-    smtp_port = int(os.getenv("SMTP_PORT", "587"))
-    smtp_username = os.getenv("SMTP_USERNAME")
-    smtp_password = os.getenv("SMTP_PASSWORD")
-    alert_email_to = os.getenv("ALERT_EMAIL_TO")
 
-    if not all([smtp_host, smtp_username, smtp_password, alert_email_to]):
-        print("Email config missing → printing email instead")
-        print_email_to_console(subject, body)
+    smtp_port = int(
+        os.getenv("SMTP_PORT", "587")
+    )
+
+    smtp_username = os.getenv(
+        "SMTP_USERNAME"
+    )
+
+    smtp_password = os.getenv(
+        "SMTP_PASSWORD"
+    )
+
+    recipient_emails = (
+        get_vendor_recipients(
+            incident.vendor
+        )
+    )
+
+    print("\n========== EMAIL DEBUG ==========")
+
+    print("Vendor:", incident.vendor)
+
+    print(
+        "Recipients:",
+        recipient_emails
+    )
+
+    print("=================================\n")
+
+    if not recipient_emails:
+        print(
+            "No active recipients found "
+            "for vendor."
+        )
+
+        return False
+
+    if not all([
+        smtp_host,
+        smtp_username,
+        smtp_password
+    ]):
+        print(
+            "Missing SMTP configuration."
+        )
+
         return False
 
     message = EmailMessage()
+
     message["Subject"] = subject
+
     message["From"] = smtp_username
-    message["To"] = alert_email_to
+
+    message["To"] = ", ".join(
+        recipient_emails
+    )
+
     message.set_content(body)
 
     try:
-        with smtplib.SMTP(smtp_host, smtp_port) as server:
+        print(
+            "Connecting to SMTP..."
+        )
+
+        with smtplib.SMTP(
+            smtp_host,
+            smtp_port
+        ) as server:
+
+            server.ehlo()
+
             server.starttls()
-            server.login(smtp_username, smtp_password)
+
+            server.ehlo()
+
+            print(
+                "Logging into SMTP..."
+            )
+
+            server.login(
+                smtp_username,
+                smtp_password
+            )
+
+            print(
+                "Sending email..."
+            )
+
             server.send_message(message)
 
-        print("Email sent successfully ✅")
+        print(
+            "Email sent successfully ✅"
+        )
+
         return True
 
     except Exception as e:
-        print(f"Email failed ❌: {e}")
-        print_email_to_console(subject, body)
+        print(
+            f"Email failed ❌: {str(e)}"
+        )
+
         return False
-
-
-def print_email_to_console(subject, body):
-    print("\n" + "=" * 60)
-    print("EMAIL PREVIEW")
-    print("=" * 60)
-    print(f"Subject: {subject}")
-    print("\nBody:")
-    print(body)
-    print("=" * 60 + "\n")
