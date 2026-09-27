@@ -6,6 +6,7 @@ import {
   Box,
   Button,
   Chip,
+  Divider,
   Paper,
   Stack,
   TextField,
@@ -15,6 +16,7 @@ import {
 import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
 import BoltRoundedIcon from "@mui/icons-material/BoltRounded";
 import RadarRoundedIcon from "@mui/icons-material/RadarRounded";
+import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 
 import { loginUser } from "../api/incidentApi";
 import { useAuth } from "../auth/AuthContext";
@@ -23,7 +25,6 @@ import VendorIQLogo from "../components/brand/VendorIQLogo";
 
 function Login() {
   const navigate = useNavigate();
-
   const { login } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -32,7 +33,7 @@ function Login() {
   });
 
   const [loading, setLoading] = useState(false);
-
+  const [demoLoading, setDemoLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleChange = (event) => {
@@ -52,15 +53,42 @@ function Login() {
       const response = await loginUser(formData);
 
       login(response);
-
       navigate("/dashboard");
     } catch (err) {
+      const detail = err?.response?.data?.detail;
+
       setError(
-        err?.response?.data?.detail ||
-          "Login failed"
+        typeof detail === "string"
+          ? detail
+          : "Unable to sign in. Please check your credentials."
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    setError("");
+    setDemoLoading(true);
+
+    try {
+      const response = await loginUser({
+        email: "demo@vendoriq.app",
+        password: "VendorIQDemo2026!",
+      });
+
+      login(response);
+      navigate("/dashboard");
+    } catch (err) {
+      const detail = err?.response?.data?.detail;
+
+      setError(
+        typeof detail === "string"
+          ? detail
+          : "Demo access is temporarily unavailable."
+      );
+    } finally {
+      setDemoLoading(false);
     }
   };
 
@@ -114,8 +142,7 @@ function Login() {
           width: 420,
           height: 420,
           borderRadius: "50%",
-          background:
-            "rgba(16, 185, 129, 0.08)",
+          background: "rgba(16, 185, 129, 0.08)",
           filter: "blur(40px)",
         }}
       />
@@ -128,8 +155,7 @@ function Login() {
           width: 460,
           height: 460,
           borderRadius: "50%",
-          background:
-            "rgba(37, 99, 235, 0.08)",
+          background: "rgba(37, 99, 235, 0.08)",
           filter: "blur(45px)",
         }}
       />
@@ -159,12 +185,10 @@ function Login() {
             label="Realtime Vendor Monitoring"
             sx={{
               mb: 3,
-              backgroundColor:
-                "rgba(16,185,129,0.12)",
+              backgroundColor: "rgba(16,185,129,0.12)",
               color: "#047857",
               fontWeight: 800,
-              border:
-                "1px solid rgba(16,185,129,0.18)",
+              border: "1px solid rgba(16,185,129,0.18)",
             }}
           />
 
@@ -193,31 +217,16 @@ function Login() {
               maxWidth: 620,
             }}
           >
-            Detect ACK failures, SLA breaches,
-            anomalies, duplicate incidents,
-            and AI-generated operational risk
-            from a unified realtime command
+            Detect ACK failures, SLA breaches, anomalies, duplicate incidents,
+            and AI-generated operational risk from a unified realtime command
             center.
           </Typography>
 
-          <Stack
-            direction="row"
-            spacing={2}
-            sx={{ mt: 5 }}
-          >
+          <Stack direction="row" spacing={2} sx={{ mt: 5 }}>
             {[
-              [
-                "Realtime Alerts",
-                <BoltRoundedIcon key="bolt" />,
-              ],
-              [
-                "JWT Protected",
-                <SecurityRoundedIcon key="security" />,
-              ],
-              [
-                "AI Incident Triage",
-                <RadarRoundedIcon key="radar" />,
-              ],
+              ["Realtime Alerts", <BoltRoundedIcon key="bolt" />],
+              ["JWT Protected", <SecurityRoundedIcon key="security" />],
+              ["AI Incident Triage", <RadarRoundedIcon key="radar" />],
             ].map(([label, icon]) => (
               <Box
                 key={label}
@@ -226,15 +235,13 @@ function Login() {
                   py: 1.4,
                   borderRadius: 4,
                   backgroundColor: "#ffffff",
-                  border:
-                    "1px solid #e2e8f0",
+                  border: "1px solid #e2e8f0",
                   color: "#0f172a",
                   display: "flex",
                   alignItems: "center",
                   gap: 1,
                   fontWeight: 800,
-                  boxShadow:
-                    "0 2px 8px rgba(15,23,42,0.04)",
+                  boxShadow: "0 2px 8px rgba(15,23,42,0.04)",
                 }}
               >
                 {icon}
@@ -253,16 +260,14 @@ function Login() {
             borderRadius: 7,
             background: "#ffffff",
             border: "1px solid #e2e8f0",
-            boxShadow:
-              "0 10px 40px rgba(15,23,42,0.08)",
+            boxShadow: "0 10px 40px rgba(15,23,42,0.08)",
             overflow: "hidden",
           }}
         >
           <Box
             sx={{
               height: 6,
-              background:
-                "linear-gradient(90deg, #10b981, #059669)",
+              background: "linear-gradient(90deg, #10b981, #059669)",
             }}
           />
 
@@ -301,8 +306,7 @@ function Login() {
                         mt: 0.4,
                       }}
                     >
-                      INTELLIGENT. REALTIME.
-                      RELIABLE.
+                      INTELLIGENT. REALTIME. RELIABLE.
                     </Typography>
                   </Box>
                 </Box>
@@ -313,21 +317,13 @@ function Login() {
                     mt: 2,
                   }}
                 >
-                  Sign in to access the realtime
-                  incident command center.
+                  Sign in to access the realtime incident command center.
                 </Typography>
               </Box>
 
-              {error && (
-                <Alert severity="error">
-                  {error}
-                </Alert>
-              )}
+              {error && <Alert severity="error">{error}</Alert>}
 
-              <Box
-                component="form"
-                onSubmit={handleSubmit}
-              >
+              <Box component="form" onSubmit={handleSubmit}>
                 <Stack spacing={2.5}>
                   <TextField
                     placeholder="Email"
@@ -352,7 +348,7 @@ function Login() {
                   <Button
                     type="submit"
                     variant="contained"
-                    disabled={loading}
+                    disabled={loading || demoLoading}
                     sx={{
                       height: 56,
                       borderRadius: 4,
@@ -361,8 +357,7 @@ function Login() {
                       fontSize: 16,
                       background:
                         "linear-gradient(135deg, #10b981, #059669)",
-                      boxShadow:
-                        "0 10px 24px rgba(16,185,129,0.28)",
+                      boxShadow: "0 10px 24px rgba(16,185,129,0.28)",
 
                       "&:hover": {
                         background:
@@ -370,11 +365,63 @@ function Login() {
                       },
                     }}
                   >
-                    {loading
-                      ? "Signing in..."
-                      : "Enter Command Center"}
+                    {loading ? "Signing in..." : "Enter Command Center"}
                   </Button>
                 </Stack>
+              </Box>
+
+              <Divider>
+                <Typography
+                  sx={{
+                    px: 1,
+                    color: "#94a3b8",
+                    fontSize: 12,
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                  }}
+                >
+                  Portfolio Demo
+                </Typography>
+              </Divider>
+
+              <Box>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  startIcon={<VisibilityRoundedIcon />}
+                  onClick={handleDemoLogin}
+                  disabled={loading || demoLoading}
+                  sx={{
+                    height: 56,
+                    borderRadius: 4,
+                    fontWeight: 900,
+                    textTransform: "none",
+                    fontSize: 16,
+                    color: "#047857",
+                    borderColor: "#a7f3d0",
+                    backgroundColor: "#f0fdf4",
+
+                    "&:hover": {
+                      borderColor: "#10b981",
+                      backgroundColor: "#ecfdf5",
+                    },
+                  }}
+                >
+                  {demoLoading ? "Opening Demo..." : "Explore Demo"}
+                </Button>
+
+                <Typography
+                  sx={{
+                    mt: 1.5,
+                    textAlign: "center",
+                    color: "#94a3b8",
+                    fontSize: 12,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  One-click access for portfolio visitors. No account required.
+                </Typography>
               </Box>
             </Stack>
           </Box>
