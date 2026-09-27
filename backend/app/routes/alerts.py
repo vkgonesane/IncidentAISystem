@@ -2,7 +2,7 @@ import datetime
 import json
 import random
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database.db import get_db
@@ -16,7 +16,7 @@ from app.services.anomaly_service import is_anomaly_alert
 from app.services.email_service import send_email_notification
 from app.services.sla_service import get_sla_status
 from app.services.websocket_manager import websocket_manager
-from app.utils.auth_dependencies import require_roles
+from app.utils.auth_dependencies import get_current_user
 
 router = APIRouter()
 
@@ -213,10 +213,19 @@ async def create_alert(
 @router.post("/alerts/simulate")
 async def simulate_alert(
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        require_roles(["ADMIN", "OPERATOR"])
-    ),
+    current_user: User = Depends(get_current_user),
 ):
+    allowed_roles = {"ADMIN", "OPERATOR"}
+    is_demo_user = (
+        current_user.email.lower() == "demo@vendoriq.app"
+    )
+
+    if current_user.role not in allowed_roles and not is_demo_user:
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to perform this action",
+        )
+
     vendors = ["Pfizer", "Cigna", "UnitedHealth", "Aetna", "Humana"]
 
     systems = [
