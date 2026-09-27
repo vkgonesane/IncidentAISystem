@@ -76,7 +76,14 @@ function Dashboard() {
 
   const isAdmin = user?.role === "ADMIN";
   const isOperator = user?.role === "OPERATOR";
-  const canManageIncidents = isAdmin || isOperator;
+
+  // Portfolio demo account gets operational access
+  // without changing its stored VIEWER role.
+  const isDemoUser =
+    user?.email?.toLowerCase() === "demo@vendoriq.app";
+
+  const canManageIncidents =
+    isAdmin || isOperator || isDemoUser;
 
   const {
     incidents,
